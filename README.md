@@ -1,11 +1,12 @@
-# 🌳 Go Bonzai™ Composite Command Tree
+# 🌳 KEG Commands
 
-*Create a new GitHub project using this template and change this
-README.md to match your project. Make all your template changes before
-making your first commit.*
-
-[![GoDoc](https://godoc.org/github.com/rwxrob/bonzai-example?status.svg)](https://godoc.org/github.com/rwxrob/bonzai-example)
+[![GoDoc](https://godoc.org/github.com/rwxrob/keg?status.svg)](https://godoc.org/github.com/rwxrob/keg)
 [![License](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](LICENSE)
+
+This `keg` [Bonzai][https://github.com/rwxrob/bonzai] branch contains
+all KEG related commands, most of which are exported so they can be
+composed individually if preferred (for example, `keg.MarkupCmd` for
+parsing KEGML in other converter utilities).
 
 ## Install
 
@@ -15,7 +16,7 @@ Bonzai command tree.
 Standalone
 
 ```
-go install github.com/rwxrob/bonzai-example/cmd/bonzai-example@latest
+go install github.com/rwxrob/keg/cmd/keg@latest
 ```
 
 Composed
@@ -25,7 +26,7 @@ package z
 
 import (
 	Z "github.com/rwxrob/bonzai/z"
-	example "github.com/rwxrob/bonzai-example"
+	example "github.com/rwxrob/keg"
 )
 
 var Cmd = &Z.Cmd{
@@ -41,7 +42,7 @@ To activate bash completion just use the `complete -C` option from your
 completion is done by the program itself.
 
 ```
-complete -C bonzai-example bonzai-example
+complete -C keg keg
 ```
 
 If you don't have bash or tab completion check use the shortcut
@@ -52,16 +53,3 @@ commands instead.
 All documentation (like manual pages) has been embedded into the source
 code of the application. See the source or run the program with help to
 access it.
-
-## Reminders
-
-* Change `bonzai-example` every place to your project name (`git grep
-  bonzai-example`)
-* Remove anything you don't need
-* Change `.github/FUNDING.yaml` to your own information
-* Update `.gitignore` to your liking
-* Will need to `go get -u` to update dependencies
-
-## Other Examples
-
-* <https://github.com/rwxrob/z> - the one that started it all

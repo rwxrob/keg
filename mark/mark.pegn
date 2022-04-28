@@ -1,0 +1,53 @@
+# KEGMark (v0.1.0) keg.pub/spec/kegmark.pegn
+# Copyright 2022 Robert S Muhlestein (rob@rwx.gg)
+# Licensed under Apache-2
+
+Document   <-- Title Body Tags?
+
+Title      <-- '# ' < uprint rune{0,49} > EOB
+Body       <-- Block+
+Tags       <-- SP{4} Tag{1,10} LF
+
+Block       <- (Numbered / Bulleted / Fenced / Verbatim
+             / BlockQuote / Separator / TeXBlock
+             / Paragraph)
+             / EOB
+
+Numbered   <-- ('1. ' Item+ LF)+
+Bulleted   <-- ('* ' Item+ LF)+
+
+ListItem   <-- Inline+
+
+Fenced     <-- BackTicked / Tilded
+BackTicked  <- BACKTICK{3} FenceType LF < rune+ > LF BACKTICK{3} # ```
+Tilded      <- TILDE{3} FenceType LF < rune+ > LF TILDE{3}       # ~~~
+FenceType  <-- uletter+
+
+# BlockQuote is a Document (requires recursive parsing)
+
+BlockQuote <-- '> ' Emote < rune* > LF ('> ' < rune* > LF)+
+Emote      <-- emoji+
+
+Separator  <-- DASH{4} # ----
+
+TeXBlock   <-- DOLLAR{2} LF rune+ LF DOLLAR{2} # $$..$$
+
+Paragraph  <-- Inline+
+
+Inline      <- WebURL / KRef / Span
+
+WebURL     <-- ('http://' / 'https://') uprint+
+KRef       <-- 'K' digit{13}      # K20220428145635
+
+Span        <- BoldItalic / Bold / Italic / Pre / TeXSpan / Plain
+
+BoldItalic <-- '***' < uprint rune* > !SP '***'
+Bold       <-- '**' < uprint rune* > !SP '**'
+Italic     <-- '*' < uprint rune* > !SP '*'
+Pre        <-- BACKTICK < uprint rune* > !SP BACKTICK
+
+Tag        <-- '#' uletter{1,20}  # #keg #zet #pegn
+
+emoji       <- # any valid, single unicode code point that is an emoji
+rune        <- uprint / SP  # tabs not allowed anywhere
+EOB         <- LF{2}

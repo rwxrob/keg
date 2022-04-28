@@ -3,10 +3,10 @@
 [![GoDoc](https://godoc.org/github.com/rwxrob/keg?status.svg)](https://godoc.org/github.com/rwxrob/keg)
 [![License](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](LICENSE)
 
-This `keg` [Bonzai][https://github.com/rwxrob/bonzai] branch contains
+This `keg` [Bonzai](https://github.com/rwxrob/bonzai) branch contains
 all KEG related commands, most of which are exported so they can be
-composed individually if preferred (for example, `keg.MarkupCmd` for
-parsing KEGML in other converter utilities).
+composed individually if preferred (for example, `keg.MarkCmd` for
+parsing KEG Mark markup language in other converter utilities).
 
 ## Install
 

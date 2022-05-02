@@ -16,7 +16,7 @@ func init() {
 var Cmd = &Z.Cmd{
 
 	Name:      `keg`,
-	Summary:   `Knowledge Exchange Grid`,
+	Summary:   `Knowledge Exchange Grid (KEG)`,
 	Version:   `v0.0.0`,
 	Copyright: `Copyright 2021 Robert S Muhlestein`,
 	License:   `Apache-2.0`,

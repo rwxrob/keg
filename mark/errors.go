@@ -11,9 +11,9 @@ func (e TagTooLong) Error() string {
 }
 
 type Expected struct {
-	This string
+	This any
 }
 
 func (e Expected) Error() string {
-	return fmt.Sprintf("expected: %v", e.This)
+	return fmt.Sprintf("expected: %v (%T)", e.This, e.This)
 }

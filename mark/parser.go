@@ -149,9 +149,9 @@ func (p *Parser) Mono() bool {
 	if !p.S.Scan() {
 		return false
 	}
-	if string(p.S.R) != BACKTICK {
+	if p.S.R != BKTICK {
 		p.S.P = beg
-		p.S.Error(Expected{BACKTICK})
+		p.S.Error(Expected{BKTICK})
 		return false
 	}
 	p.S.Log()
@@ -160,9 +160,9 @@ func (p *Parser) Mono() bool {
 		return false
 	}
 	p.S.Log()
-	if string(p.S.R) != BACKTICK {
+	if p.S.R != BKTICK {
 		p.S.P = beg
-		p.S.Error(Expected{BACKTICK})
+		p.S.Error(Expected{BKTICK})
 		return false
 	}
 	return true

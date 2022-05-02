@@ -17,7 +17,7 @@ Numbered   <-- ('1. ' Item+ LF)+
 Bulleted   <-- ('* ' Item+ LF)+
 ListItem   <-- Inline+
 Fenced     <-- BackTicked / Tilded
-BackTicked  <- BACKTICK{3} FenceType LF < rune+ > LF BACKTICK{3} # ```
+BackTicked  <- BKTICK{3} FenceType LF < rune+ > LF BKTICK{3} # ```
 Tilded      <- TILDE{3} FenceType LF < rune+ > LF TILDE{3}       # ~~~
 FenceType  <-- uletter+
 BlockQuote <-- '> ' Emote < rune* > LF ('> ' < rune* > LF)+
@@ -28,14 +28,11 @@ Paragraph  <-- Inline+
 Inline      <- WebURL / KRef / Span
 WebURL     <-- ('http://' / 'https://') uprint+
 KRef       <-- 'K' digit{13}      # K20220428145635
-Span        <- BoldItalic / Bold / Italic / Pre / TeXSpan / Plain
-BoldItalic <-- '***' < (Text / Mono) > !SP '***'
-Bold       <-- '**' < (Text / Mono) > !SP '**'
-Italic     <-- '*' < (Text / Mono) > !SP '*'
-
-Mono       <-- BACKTICK !SP (!BACKTICK uprint / SP)+ !SP BACKTICK
-
+Span        <- BoldItalic / Bold / Italic / Mono / TeXSpan / Plain
+BoldItalic <-- '***' < !SP (!'***' uprint / SP)+ > !SP '***'
+Bold       <-- '**' < !SP (!'***' uprint / SP)+ > !SP '**'
+Italic     <-- '*' < !SP (!'*' uprint / SP)+ > !SP '*'
+Mono       <-- BKTICK !SP (!BKTICK uprint / SP)+ !SP BKTICK
 Tag        <-- '#' < uletter{1,20} >  # #keg #zet #pegn
-Text        <- uprint (uprint / SP)*
 emoji       <- (!SP .)+ # FIXME any valid combination of unicode to make emoji
 EOB         <- LF{2}

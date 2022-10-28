@@ -152,6 +152,14 @@ tables in their `README.md` files and store the actual data in the
 `DATA.*` file instead. It is also RECOMMENDED to limit tables to one per
 *text node*.
 
+**Images MUST NOT be included in KEG Mark.** Unlike most other flavors
+of Markdown, KEG Mark deliberately omits images of any kind. This is
+because all images MUST be contained within their own *figure nodes*.
+This promotes the use of images to convey something that cannot
+otherwise be described with text. Such a limitation promotes the widest
+possible range of participants and eliminates superfluous decoration
+which bloats content and complicates the publishing process.
+
 ## Dynamic Node
 
 Dynamic nodes must be periodically generated. The method of generation

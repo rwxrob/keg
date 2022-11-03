@@ -56,3 +56,31 @@ commands instead.
 All documentation (like manual pages) has been embedded into the source
 code of the application. See the source or run the program with help to
 access it.
+
+## Command Line Usage
+
+```
+keg help
+keg set
+ket get
+keg conf
+keg map - return YAML config for current local keg ids and directories
+keg current - returns current local keg id
+keg set current - sets current local keg id
+keg nodes update [KEG] - update KEGNODES (and /index) for target KEG
+keg update - updates own KEGNODES and follow cache
+keg follow add - add an entry to FOLLOWS
+keg follow cache - fetch fresh cache of all FOLLOWS
+keg avoid add - add an entry to AVOID
+keg nodes - print the KEGNODES file
+keg copy|cp (KEG|NODE ...) KEGTARGET - copy a KEG into into another
+keg move|mv (KEG|NODE ...) KEGTARGET - move a KEG or node into another
+```
+
+## Configuration
+
+`map` - map of all local keg ids pointing to their directories (like PATH)
+
+## Variables
+
+`current` - current keg from `map`

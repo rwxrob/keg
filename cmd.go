@@ -6,6 +6,9 @@ package keg
 
 import (
 	Z "github.com/rwxrob/bonzai/z"
+	"github.com/rwxrob/conf"
+	"github.com/rwxrob/help"
+	"github.com/rwxrob/vars"
 )
 
 func init() {
@@ -16,7 +19,7 @@ func init() {
 var Cmd = &Z.Cmd{
 
 	Name:      `keg`,
-	Summary:   `Knowledge Exchange Grid (KEG)`,
+	Summary:   `manage knowledge exchange graphs (KEG)`,
 	Version:   `v0.0.0`,
 	Copyright: `Copyright 2021 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
@@ -25,7 +28,13 @@ var Cmd = &Z.Cmd{
 	Issues:    `github.com/rwxrob/keg/issues`,
 
 	Commands: []*Z.Cmd{
-		//		help.Cmd, conf.Cmd, vars.Cmd,
+		help.Cmd, conf.Cmd, vars.Cmd,
+	},
+
+	Shortcuts: Z.ArgMap{
+		`current`: {`var`, `get`, `current`},
+		`set`:     {`var`, `set`},
+		`map`:     {`conf`, `query`, `.keg.map`},
 	},
 
 	Description: `
@@ -34,4 +43,16 @@ var Cmd = &Z.Cmd{
 		free, decentralized, protocol-agnostic, world-wide, Knowledge
 		Exchange Grid, a modern replacement for the very broken WorldWideWeb
 		(see keg.pub for more).`,
+
+	Other: []Z.Section{
+		{
+			`Configuration`, `
+			* **map** - map of local keg ids pointing to their directories (like PATH)
+			* **another** - something`,
+		},
+		{
+			`Variables`, `
+			**current** - current keg id from conf map`,
+		},
+	},
 }

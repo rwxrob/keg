@@ -8,6 +8,7 @@ import (
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/help"
+	"github.com/rwxrob/keg/node"
 	"github.com/rwxrob/vars"
 )
 
@@ -17,7 +18,6 @@ func init() {
 }
 
 var Cmd = &Z.Cmd{
-
 	Name:      `keg`,
 	Summary:   `manage knowledge exchange graphs (KEG)`,
 	Version:   `v0.0.0`,
@@ -28,7 +28,7 @@ var Cmd = &Z.Cmd{
 	Issues:    `github.com/rwxrob/keg/issues`,
 
 	Commands: []*Z.Cmd{
-		help.Cmd, conf.Cmd, vars.Cmd,
+		help.Cmd, conf.Cmd, vars.Cmd, node.Cmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -37,22 +37,12 @@ var Cmd = &Z.Cmd{
 		`map`:     {`conf`, `query`, `.keg.map`},
 	},
 
+	ConfVars: true,
+
 	Description: `
 		The **{{.Name}}** command composes together the branches and
 		commands used to search, read, create, and share knowledge on the
 		free, decentralized, protocol-agnostic, world-wide, Knowledge
 		Exchange Grid, a modern replacement for the very broken WorldWideWeb
 		(see keg.pub for more).`,
-
-	Other: []Z.Section{
-		{
-			`Configuration`, `
-			* **map** - map of local keg ids pointing to their directories (like PATH)
-			* **another** - something`,
-		},
-		{
-			`Variables`, `
-			**current** - current keg id from conf map`,
-		},
-	},
 }

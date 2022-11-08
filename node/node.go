@@ -1,15 +1,11 @@
 package node
 
 import (
-	"fmt"
 	"os"
 	"path"
-	"path/filepath"
-	"strings"
 
+	"github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
-	"github.com/rwxrob/keg/kegml/scan"
-	"github.com/rwxrob/pegn/scanner"
 )
 
 // MkTemp creates a text node directory containing a README.md
@@ -29,25 +25,13 @@ func MkTemp() (string, error) {
 	return readme, nil
 }
 
-// ReadTitle reads a KEG node title from KEGML file.
-func ReadTitle(path string) (string, error) {
-	if !strings.HasSuffix(path, `README.md`) {
-		path = filepath.Join(path, `README.md`)
+// Import moves the nodedir into the KEG directory for the kegid giving
+// it the nodeid name. Import will fail if the given nodeid already
+// existing the the target KEG.
+func Import(from, to, nodeid string) error {
+	to = path.Join(to, nodeid)
+	if fs.Exists(to) {
+		return fs.ErrorExists{to}
 	}
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	return ParseTitle(f)
-}
-
-// ParseTitle parses a KEG node title from a KEGML string, []byte, or
-// io.Reader using a pegn.Scanner.
-func ParseTitle(a any) (string, error) {
-	b := new(strings.Builder)
-	s := scanner.New(a)
-	if !scan.Title(s, b) {
-		return "", fmt.Errorf("failed to parse title") // TODO proper error
-	}
-	return b.String(), nil
+	return os.Rename(from, to)
 }

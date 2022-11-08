@@ -1,28 +1,33 @@
 package node
 
 import (
-	"log"
+	"path"
 
+	"github.com/gosimple/slug"
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
+	"github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/help"
+	"github.com/rwxrob/keg/node/parse"
+	"github.com/rwxrob/keg/node/read"
 	"github.com/rwxrob/vars"
 )
 
 var Cmd = &Z.Cmd{
 	Name:    `node`,
+	Aliases: []string{`n`},
 	Summary: `work with a single KEG node`,
 	Commands: []*Z.Cmd{
 		help.Cmd, vars.Cmd, conf.Cmd,
-		createCmd,
+		createCmd, parse.Cmd,
 	},
 	Shortcuts: Z.ArgMap{},
 }
 
 var createCmd = &Z.Cmd{
 	Name:     `create`,
-	Aliases:  []string{`add`, `new`},
+	Aliases:  []string{`c`},
 	Summary:  `create node in current KEG`,
 	Commands: []*Z.Cmd{help.Cmd},
 
@@ -37,6 +42,13 @@ var createCmd = &Z.Cmd{
 			return Z.MissingVar{x.Caller.Caller.Path(`current`)}
 		}
 
+		curdir, err := x.Caller.Caller.C(`map.` + curkeg)
+		if curdir == "" {
+			return Z.MissingConf{x.Caller.Caller.Path(`map.` + curkeg)}
+		}
+
+		curdir = fs.Tilde2Home(curdir)
+
 		readme, err := MkTemp()
 		if err != nil {
 			return err
@@ -46,19 +58,16 @@ var createCmd = &Z.Cmd{
 			return err
 		}
 
-		title, err := ReadTitle(readme)
+		title, err := read.Title(readme)
 		if err != nil {
 			return err
 		}
 
-		log.Print("title", title)
-
+		id := slug.Make(title)
+		if err := Import(path.Dir(readme), curdir, id); err != nil {
+			return err
+		}
+		// TODO update the index, but only for the new node
 		return nil
-
-		/*
-			log.Println("TODO slugify the title gosimple/slug")
-			log.Println("TODO call Import(path,current), fail if no current")
-			return nil
-		*/
 	},
 }

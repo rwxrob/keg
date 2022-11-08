@@ -1,0 +1,59 @@
+# KEGML (v0.1.0) keg.pub/spec/kegmark.pegn
+# Copyright 2022 Robert S Muhlestein (rob@rwx.gg)
+# Licensed under Apache-2
+
+Grammar       <-- Title Block+ Tags?
+Title         <-- '#' SP <(rune){1,70}>
+
+Block         <-- Include / Bulleted / Numbered / Figure / Fenced
+                  / Tex / Quote / Raw / Div / Refs / Para
+
+Bullet        <-- '*' SP Para
+Number        <-- '1.' SP Para
+
+Span          <-- Inflect / Bold / Verbatim / Math / Deleted
+                  / SQuoted / DQuoted / Bracketed / Mustached / Braced
+                  / Angled / URL / LongDash / ShortDash / Ellipsis / Plain
+
+NodeLink      <-- # 
+
+Fenced        <-- <=tag ('~'{3,8} / BTICK{3,8}) > Attributes?
+                  !tag rune+ tag
+
+Div           <-- <=tag ':'{3,8} Attributes >
+                  !tag rune+ tag
+
+Attributes    <-- SimpleClass / BracedAttributes
+
+Attributes    <-- ClassName / '{' ('#' Anchor) ('.' ClassName)* Attribute* '}'
+
+SimpleClass   <-- ClassName
+
+Include       <-- NodeInclude / FileInclude
+
+Bold          <-- '**' !'**' Span+ '**'
+Inflect       <-- '*' !'*' Span+ '*'
+
+Tags          <-- SP{4} Tag+
+Tag           <-- hashtag TODO
+
+Deleted       <-- '~~' !'~~' Span+ '~~'
+Parens        <-- '(' !'(' Span+ ')'
+Bracketed     <-- '[' !'[' Span+ ']'
+Mustached     <-- '{{' !'{{' Span+ '}}'
+Braced        <-- '{' !'{' Span+ '}'
+Angled        <-- '<' !'>' Span+ '>'
+SQuoted       <-- SQ !SQ Span+ SQ
+DQuoted       <-- DQ !DQ Span+ DQ
+
+LongDash      <-- '---'
+ShortDash     <-- '--'
+Ellipsis      <-- '...'
+
+Word          <-- uprint+
+
+hashtag       <- '#' / uFF03
+
+ws            <- LF / SP
+rune          <- ws / uprint
+

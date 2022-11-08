@@ -1,17 +1,16 @@
-package scan_test
+package kegml_test
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/rwxrob/keg/kegml/scan"
+	"github.com/rwxrob/keg/kegml"
 	"github.com/rwxrob/pegn/scanner"
 )
 
 func ExampleTitle_short() {
 
 	s := scanner.New(`# A short title`)
-	fmt.Println(scan.Title(s, nil))
+	fmt.Println(kegml.Title.Scan(s, nil))
 	s.Print()
 
 	// Output:
@@ -23,10 +22,10 @@ func ExampleTitle_short() {
 func ExampleTitle_parsed_Short() {
 
 	s := scanner.New(`# A short title`)
-	title := new(strings.Builder)
-	fmt.Println(scan.Title(s, title))
+	title := make([]rune, 0, 100)
+	fmt.Println(kegml.Title.Scan(s, &title))
 	s.Print()
-	fmt.Printf("%q", title)
+	fmt.Printf("%q", string(title))
 
 	// Output:
 	// true
@@ -38,26 +37,26 @@ func ExampleTitle_parsed_Short() {
 func ExampleTitle_long() {
 
 	s := scanner.New(`# A really, really long title that is more than 72 runes long but doesn't get truncated`)
-	fmt.Println(scan.Title(s, nil))
+	fmt.Println(kegml.Title.Scan(s, nil))
 	s.Print()
 
 	// Output:
 	// false
-	// 'g' 74-75 "et truncated"
+	// 't' 72-73 " get truncated"
 
 }
 
 func ExampleTitle_parsed_Long() {
 
 	s := scanner.New(`# A really, really long title that is more than 72 runes long but doesn't get truncated`)
-	title := new(strings.Builder)
-	fmt.Println(scan.Title(s, title))
+	title := make([]rune, 0, 70)
+	fmt.Println(kegml.Title.Scan(s, &title))
 	s.Print()
-	fmt.Printf("%q", title.String())
+	fmt.Printf("%q", string(title))
 
 	// Output:
 	// false
-	// 'g' 74-75 "et truncated"
-	// ""
+	// 't' 72-73 " get truncated"
+	// "A really, really long title that is more than 72 runes long but doesn'"
 
 }

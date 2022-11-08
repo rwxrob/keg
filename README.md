@@ -29,12 +29,12 @@ package z
 
 import (
 	Z "github.com/rwxrob/bonzai/z"
-	example "github.com/rwxrob/keg"
+	"github.com/rwxrob/keg"
 )
 
 var Cmd = &Z.Cmd{
 	Name:     `z`,
-	Commands: []*Z.Cmd{help.Cmd, example.Cmd, example.BazCmd},
+	Commands: []*Z.Cmd{help.Cmd, keg.Cmd},
 }
 ```
 
@@ -73,12 +73,12 @@ keg set current - sets current local keg id
 keg scope - print current default scope
 keg set scope SCOPE - set default search scope
 
-kn - shortcut for `keg node`
+kn - shortcut for `keg node` (monolith only)
 
 -----------
 
 kn edit [NODE] - edit current or specific node (best guess at NODE)
-kn create|new|add - create a new KEG node
+kn create - create a new KEG node
 
 keg nodes - print the KEGNODES file
 keg nodes NODEPATTERN - list nodes matching pattern

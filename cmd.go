@@ -1,20 +1,29 @@
 // Copyright 2022 Robert Muhlestein.
 // SPDX-License-Identifier: Apache-2.0
 
-// Package example provides the Bonzai command branch of the same name.
 package keg
 
 import (
+	"embed"
+
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
+	"github.com/rwxrob/emb"
+	"github.com/rwxrob/fs"
 	"github.com/rwxrob/help"
 	"github.com/rwxrob/keg/node"
+	"github.com/rwxrob/term"
 	"github.com/rwxrob/vars"
 )
+
+//go:embed files
+var files embed.FS
 
 func init() {
 	Z.Conf.SoftInit()
 	Z.Vars.SoftInit()
+	emb.FS = files
+	emb.Top = "files"
 }
 
 var Cmd = &Z.Cmd{
@@ -28,13 +37,14 @@ var Cmd = &Z.Cmd{
 	Issues:    `github.com/rwxrob/keg/issues`,
 
 	Commands: []*Z.Cmd{
-		help.Cmd, conf.Cmd, vars.Cmd, node.Cmd,
+		help.Cmd, conf.Cmd, vars.Cmd, emb.Cmd, node.Cmd, dirCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
 		`current`: {`var`, `get`, `current`},
 		`set`:     {`var`, `set`},
 		`map`:     {`conf`, `query`, `.keg.map`},
+		`pegn`:    {`emb`, `cat`, `kegml.pegn`},
 	},
 
 	ConfVars: true,
@@ -45,4 +55,20 @@ var Cmd = &Z.Cmd{
 		free, decentralized, protocol-agnostic, world-wide, Knowledge
 		Exchange Grid, a modern replacement for the very broken WorldWideWeb
 		(see keg.pub for more).`,
+}
+
+var dirCmd = &Z.Cmd{
+	Name: `dir`,
+	Call: func(x *Z.Cmd, args ...string) error {
+		curkeg, err := x.Caller.Get(`current`)
+		if err != nil {
+			return err
+		}
+		curdir, err := x.Caller.C(`map.` + curkeg)
+		if err != nil {
+			return err
+		}
+		term.Print(fs.Tilde2Home(curdir))
+		return nil
+	},
 }

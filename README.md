@@ -73,6 +73,8 @@ keg set current - sets current local keg id
 keg scope - print current default scope
 keg set scope SCOPE - set default search scope
 
+keg NAME 
+
 kn - shortcut for `keg node` (monolith only)
 
 -----------

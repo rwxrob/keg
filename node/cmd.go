@@ -28,14 +28,22 @@ var Cmd = &Z.Cmd{
 var createCmd = &Z.Cmd{
 	Name:     `create`,
 	Aliases:  []string{`c`},
-	Summary:  `create node in current KEG`,
+	Summary:  `create KEG node`,
+	Usage:    `[help|KEG]`,
+	MaxArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
+		var curkeg string
+		var err error
 
-		curkeg, err := x.Caller.Caller.Get(`current`)
-		if err != nil {
-			return err
+		if len(args) > 0 {
+			curkeg = args[0]
+		} else {
+			curkeg, err = x.Caller.Caller.Get(`current`)
+			if err != nil {
+				return err
+			}
 		}
 
 		if curkeg == "" {

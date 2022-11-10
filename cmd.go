@@ -5,6 +5,7 @@ package keg
 
 import (
 	"embed"
+	"log"
 
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
@@ -55,6 +56,12 @@ var Cmd = &Z.Cmd{
 		free, decentralized, protocol-agnostic, world-wide, Knowledge
 		Exchange Grid, a modern replacement for the very broken WorldWideWeb
 		(see keg.pub for more).`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		log.Print("made")
+
+		return nil
+	},
 }
 
 var dirCmd = &Z.Cmd{

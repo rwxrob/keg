@@ -1,3 +1,5 @@
+tags: [some, thing]
+---
 # 🌳 KEG Commands
 
 *🚧This project is in active preliminary development. Commits are public

@@ -26,9 +26,10 @@
 # assumed to be a block without any validation of syntax validation.
 # Use Node instead when such validation is required.
 
-NodeBlocks <-- Title (IncBlock / BulBlock / NumBlock / FigBlock /
-               QuoteBlock / FootBlock / MathBlock / FenBlock /
-               DivBlock / Indented / ParaBlock)*
+NodeBlocks <-- Title Block* FootBlock?
+Block      <-  IncBlock / BulBlock / NumBlock / FigBlock /
+               QuoteBlock / MathBlock / FenBlock / DivBlock /
+               Indented / ParaBlock
 
 Title      <-- '#' SP < (rune){1,70} > EndBlock
 BulBlock   <-- < ('*' / '+' / '-') SP (!EndBlock rune)+ > EndBlock
@@ -55,13 +56,11 @@ ParaBlock  <-- < !SP (!EndBlock rune)+ > EndBlock
 # Node divides up the blocks into their semantic parts producing a much
 # richer AST albeit more work to parse and traverse.
 
-Node       <-- Title SemBlock*
+Node       <-- Title SemBlock* Footnotes?
 SemBlock    <- Includes / Bulleted / Numbered / Figure / Fenced /
-               Latex / Quote / Division / Indented / Footnotes /
-               Paragraph
+               Latex / Quote / Division / Indented / Paragraph
 
 # ---------------------------------------------------------------------
-
 
 IncUnfold  <-- '+ ' Link
 IncFold    <-- '- ' Link

@@ -13,18 +13,44 @@
 #     * BulBlock   -> Bulleted
 #     * NumBlock   -> Numbered
 #     * FigBlock   -> Figure
+#     * QuoteBlock -> Quote
 #     * FenBlock   -> Fenced
 #     * DivBlock   -> Division
 #     * FootBlock  -> Footnotes
-#     * TexBlock   -> Latex
-#     * QuoteBlock -> Quote
+#     * MathBlock  -> MathBlock
 #     * ParaBlock  -> Paragraph
 #     * Indented   -> Indented
+#
+# Note that only enough of the beginning of a block is checked to
+# identify the potential beginning of such a block and the rest is
+# assumed to be a block without any validation of syntax validation.
+# Use Node instead when such validation is required.
 
-NodeBlocks <-- Title Block*
-Block       <- IncBlock / BulBlock / NumBlock / FigBlock / FenBlock /
-               TexBlock / QuoteBlock / DivBlock / Indented / FootBlock /
-               ParaBlock
+NodeBlocks <-- Title (IncBlock / BulBlock / NumBlock / FigBlock /
+               QuoteBlock / FootBlock / MathBlock / FenBlock /
+               DivBlock / Indented / ParaBlock)*
+
+Title      <-- '#' SP < (rune){1,70} > EndBlock
+BulBlock   <-- < ('*' / '+' / '-') SP (!EndBlock rune)+ > EndBlock
+NumBlock   <-- < '1.' SP (!EndBlock rune)+ > EndBlock
+FigBlock   <-- < '![' (!EndBlock rune)+ > EndBlock
+QuoteBlock <-- < '>' SP (!EndBlock rune)+ > EndBlock
+FootBlock  <-- < '[^' SP (!EndBlock rune)+ > EndBlock
+MathBlock  <-- < '$$' (!(LF '$$' EndBlock) rune)+ LF '$$' > EndBlock
+
+FenBlock   <-- < <:tok ('~' / BKTICK){3,8} >
+                 (!(LF tok EndBlock) rune)+ LF tok
+               > EndBlock
+
+DivBlock   <-- < <:tok ':'{3,8} >
+                 (!(LF tok EndBlock) rune)+ LF tok
+               > EndBlock
+
+Indented   <-- < SP{4} (!EndBlock rune)+ > EndBlock
+               > EndBlock
+ParaBlock  <-- < !SP (!EndBlock rune)+ > EndBlock
+
+# ---------------------------------------------------------------------
 
 # Node divides up the blocks into their semantic parts producing a much
 # richer AST albeit more work to parse and traverse.
@@ -36,10 +62,11 @@ SemBlock    <- Includes / Bulleted / Numbered / Figure / Fenced /
 
 # ---------------------------------------------------------------------
 
-Title      <-- '#' SP <(rune){1,70}>
-Include    <-- '* ' Link
+
 IncUnfold  <-- '+ ' Link
 IncFold    <-- '- ' Link
+
+# ---------------------------------------------------------------------
 
 # TODO handle nested lists
 
@@ -90,5 +117,4 @@ Word          <-- uprint+
 hashtag       <- '#' / uFF03
 
 ws            <- LF / SP
-rune          <- ws / uprint
 

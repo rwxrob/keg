@@ -24,3 +24,21 @@ func ExampleNodePaths() {
 	// 0 1 10 11 12 2 3 4 5 6 7 8 9
 
 }
+
+/*
+func ExampleDex() {
+	fmt.Println(keg.Dex("testdata/samplekeg"))
+
+	// Output:
+	// ignored
+}
+*/
+
+/*
+func ExampleMakeDex() {
+	fmt.Println(keg.MakeDex("testdata/samplekeg"))
+
+	// Output:
+	// ignored
+}
+*/

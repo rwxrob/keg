@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/rwxrob/bonzai v0.14.1
-	github.com/rwxrob/scan v0.9.0
+	github.com/rwxrob/scan v0.11.0
 	github.com/rwxrob/structs v0.6.0
-	github.com/rwxrob/to v0.7.0
+	github.com/rwxrob/to v0.8.1
 )
 
 require (
@@ -21,6 +21,7 @@ require (
 	github.com/mikefarah/yq/v4 v4.25.1 // indirect
 	github.com/rwxrob/compcmd v0.3.0 // indirect
 	github.com/rwxrob/fn v0.3.3 // indirect
+	github.com/rwxrob/fs v0.11.0 // indirect
 	github.com/rwxrob/json v0.7.1 // indirect
 	github.com/rwxrob/term v0.2.7 // indirect
 	github.com/rwxrob/yq v0.2.4 // indirect

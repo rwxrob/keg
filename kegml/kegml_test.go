@@ -7,10 +7,11 @@ import (
 	"github.com/rwxrob/pegn/scanner"
 )
 
-func ExampleTitle_short() {
+func ExampleScanTitle_short() {
 
 	s := scanner.New(`# A short title`)
-	fmt.Println(kegml.Title.Scan(s, nil))
+
+	fmt.Println(kegml.ScanTitle(s, nil))
 	s.Print()
 
 	// Output:
@@ -22,8 +23,10 @@ func ExampleTitle_short() {
 func ExampleTitle_parsed_Short() {
 
 	s := scanner.New(`# A short title`)
+
 	title := make([]rune, 0, 100)
-	fmt.Println(kegml.Title.Scan(s, &title))
+	fmt.Println(kegml.ScanTitle(s, &title))
+
 	s.Print()
 	fmt.Printf("%q", string(title))
 
@@ -34,6 +37,7 @@ func ExampleTitle_parsed_Short() {
 
 }
 
+/*
 func ExampleTitle_long() {
 
 	s := scanner.New(`# A really, really long title that is more than 72 runes long but doesn't get truncated`)
@@ -60,3 +64,4 @@ func ExampleTitle_parsed_Long() {
 	// "A really, really long title that is more than 72 runes long but doesn'"
 
 }
+*/

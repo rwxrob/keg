@@ -5,7 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rwxrob/keg/node/parse"
+	"github.com/rwxrob/keg/kegml"
+	"github.com/rwxrob/pegn/scanner"
 )
 
 // Title reads a KEG node title from KEGML file.
@@ -17,5 +18,10 @@ func Title(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return parse.Title(f)
+	s := scanner.New(f)
+	nd := kegml.ParseTitle(s)
+	if nd == nil {
+		return "", s
+	}
+	return nd.V, nil
 }

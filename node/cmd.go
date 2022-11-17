@@ -1,9 +1,8 @@
 package node
 
 import (
-	"path"
+	"log"
 
-	"github.com/gosimple/slug"
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/fs"
@@ -70,11 +69,16 @@ var createCmd = &Z.Cmd{
 		if err != nil {
 			return err
 		}
+		log.Println(title)
+		/*
+		   // FIXME: before moving in, make sure to assign the right incremental
+		   // integer ID
 
-		id := slug.Make(title)
-		if err := Import(path.Dir(readme), curdir, id); err != nil {
-			return err
-		}
+		   		id := slug.Make(title)
+		   		if err := Import(path.Dir(readme), curdir, id); err != nil {
+		   			return err
+		   		}
+		*/
 		// TODO update the index, but only for the new node
 		return nil
 	},

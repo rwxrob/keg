@@ -69,6 +69,11 @@ IncFold    <-- '- ' Link
 
 # TODO handle nested lists
 
+DexEntry   <-- '*' SP Isosec SP '[' NodeTitle '](/' NodeID ')'
+Isosec     <-- digit{8} 'T' digit{6} 'Z'
+NodeTitle  <-- uprint+
+NodeID     <-- digit+
+
 Bullet     <-- ('*' / '-' / '+') SP Para
 Number     <-- '1.' SP Para
 

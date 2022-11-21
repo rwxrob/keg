@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"time"
@@ -12,7 +13,6 @@ import (
 	_fs "github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/keg/kegml"
-	"github.com/rwxrob/keg/model"
 )
 
 // NodePaths returns a list of node directory paths contained in the
@@ -29,9 +29,9 @@ import (
 var NodePaths = _fs.IntDirs
 
 // ScanDex takes the target path to a keg root directory returns a
-// model.Dex object.
-func ScanDex(kegdir string) (*model.Dex, error) {
-	var dex model.Dex
+// Dex object.
+func ScanDex(kegdir string) (*Dex, error) {
+	var dex Dex
 	dirs, _, _ := NodePaths(kegdir)
 	sort.Slice(dirs, func(i, j int) bool {
 		_, iinfo := _fs.LatestChange(dirs[i].Path)
@@ -45,7 +45,7 @@ func ScanDex(kegdir string) (*model.Dex, error) {
 		if err != nil {
 			continue
 		}
-		entry := model.DexEntry{U: i.ModTime(), T: title, N: id}
+		entry := DexEntry{U: i.ModTime(), T: title, N: id}
 		dex = append(dex, entry)
 	}
 	return &dex, nil
@@ -113,11 +113,11 @@ func UpdateUpdated(kegpath string) error {
 // a time.Time. If a time stamp could not be determined returns time.
 func Updated(kegpath string) (*time.Time, error) {
 	kegfile := filepath.Join(kegpath, `dex`, `nodes.md`)
-	str, err := file.FindString(kegfile, model.IsoDateExpStr)
+	str, err := file.FindString(kegfile, IsoDateExpStrMD)
 	if err != nil {
 		return nil, err
 	}
-	t, err := time.Parse(model.IsoDateFmt, str)
+	t, err := time.Parse(IsoDateFmtMD, str)
 	if err != nil {
 		return nil, err
 	}
@@ -133,5 +133,25 @@ func UpdatedString(kegpath string) string {
 		log.Println(err)
 		return ""
 	}
-	return (*u).Format(model.IsoDateFmt)
+	return (*u).Format(IsoDateFmt)
+}
+
+// Glob2Regx returns a new, compiled regular expression from
+// a traditional glob syntax.
+//
+//     *       -> .*
+//     ?       -> .
+//     {3..22} -> (?:[3-9]|1[0-9]|2[0-2])
+//     [abc]   -> [abc]
+//     [0-9]   -> [0-9]
+//
+func Glob2Regx(glob string) *regexp.Regexp {
+	// TODO
+	return nil
+}
+
+func Find(exp string) *Dex {
+	var dex Dex
+	// TODO
+	return &dex
 }

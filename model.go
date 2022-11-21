@@ -1,4 +1,4 @@
-package model
+package keg
 
 import (
 	"bytes"
@@ -10,7 +10,9 @@ import (
 )
 
 const IsoDateFmt = `2006-01-02T15:04:05Z`
+const IsoDateFmtMD = `2006-01-02 15:04:05Z`
 const IsoDateExpStr = `\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ`
+const IsoDateExpStrMD = `\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ`
 
 // DexEntry represents a single line in the dex/nodes.md or
 // dex/nodes.json file. All three fields are always required.
@@ -57,7 +59,7 @@ func (e DexEntry) MD() string {
 
 	return fmt.Sprintf(
 		"* %v [%v](/%v)\n",
-		e.U.Format(IsoDateFmt),
+		e.U.Format(IsoDateFmtMD),
 		e.T, e.N,
 	)
 }

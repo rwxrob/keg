@@ -96,6 +96,12 @@ Attributes    <-- ClassName / '{' ('#' Anchor) ('.' ClassName)* Attribute* '}'
 SimpleClass   <-- ClassName
 
 Include       <-- NodeInclude / FileInclude
+NodeInclude   <-- '*' SP '[' NodeTitle '](/' NodeID QueryCode? ')' EndLine
+FileInclude   <-- '*' SP '[' NodeTitle '](' !'/' File QueryCode? ')' EndLine
+File          <-- (!')' !'?' uprint)+
+QueryCode     <-  '?' (ResQCode / QCode)
+ResQCode      <-- upper+
+QCode         <-- lower+
 
 Bold          <-- '**' !'**' Span+ '**'
 Inflect       <-- '*' !'*' Span+ '*'

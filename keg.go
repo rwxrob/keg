@@ -41,7 +41,6 @@ func ScanDex(kegdir string) (*model.Dex, error) {
 	for _, d := range dirs {
 		_, i := _fs.LatestChange(d.Path)
 		title, _ := kegml.ReadTitle(d.Path)
-		// TODO change this to DexEntry.MD
 		id, err := strconv.Atoi(d.Info.Name())
 		if err != nil {
 			continue
@@ -69,8 +68,7 @@ func MakeDex(kegdir string) error {
 	if err := file.Overwrite(mdpath, dex.MD()); err != nil {
 		return err
 	}
-	// TODO UpdateUpdated
-	return nil
+	return UpdateUpdated(kegdir)
 }
 
 // MkTempNode creates a text node directory containing a README.md

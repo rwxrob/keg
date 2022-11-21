@@ -20,6 +20,7 @@
 #     * MathBlock  -> MathBlock
 #     * ParaBlock  -> Paragraph
 #     * Indented   -> Indented
+#     * Separator  -> Separator
 #
 # Note that only enough of the beginning of a block is checked to
 # identify the potential beginning of such a block and the rest is
@@ -27,7 +28,7 @@
 # Use Node instead when such validation is required.
 
 NodeBlocks <-- Title Block* FootBlock?
-Block      <-  IncBlock / BulBlock / NumBlock / FigBlock /
+Block      <-  IncBlock / Separator/ BulBlock / NumBlock / FigBlock /
                QuoteBlock / MathBlock / FenBlock / DivBlock /
                Indented / ParaBlock
 
@@ -57,8 +58,8 @@ ParaBlock  <-- < !SP (!EndBlock rune)+ > EndBlock
 # richer AST albeit more work to parse and traverse.
 
 Node       <-- Title SemBlock* Footnotes?
-SemBlock    <- Includes / Bulleted / Numbered / Figure / Fenced /
-               Latex / Quote / Division / Indented / Paragraph
+SemBlock    <- Includes / Separator / Bulleted / Numbered / Figure /
+               Fenced / Latex / Quote / Division / Indented / Paragraph
 
 # ---------------------------------------------------------------------
 
@@ -110,6 +111,7 @@ Braced        <-- '{' !'{' Span+ '}'
 Angled        <-- '<' !'>' Span+ '>'
 SQuoted       <-- SQ !SQ Span+ SQ
 DQuoted       <-- DQ !DQ Span+ DQ
+
 
 LongDash      <-- '---'
 ShortDash     <-- '--'

@@ -25,9 +25,26 @@ func ExampleNodePaths() {
 
 }
 
+func ExampleUpdatedString() {
+	fmt.Println(keg.UpdatedString(`testdata/samplekeg`))
+	// Output:
+	// 2022-11-17T18:34:10Z
+}
+
 /*
-func ExampleDex() {
-	fmt.Println(keg.Dex("testdata/samplekeg"))
+func ExampleUpdateUpdated() {
+	err := keg.UpdateUpdated(`testdata/samplekeg`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// Output:
+	// ignored
+}
+*/
+
+/*
+func ExampleScanDex() {
+	fmt.Println(keg.ScanDex("testdata/samplekeg"))
 
 	// Output:
 	// ignored

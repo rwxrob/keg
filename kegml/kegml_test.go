@@ -37,6 +37,20 @@ func ExampleTitle_parsed_Short() {
 
 }
 
+func ExampleTitle() {
+	title, _ := kegml.ReadTitle(`testdata/sample-node`)
+	fmt.Println(title)
+	// Output:
+	// This is a title
+}
+
+func ExampleTitle_no_README() {
+	title, _ := kegml.ReadTitle(`testdata/sample-node`)
+	fmt.Println(title)
+	// Output:
+	// This is a title
+}
+
 /*
 func ExampleTitle_long() {
 

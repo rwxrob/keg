@@ -1,9 +1,18 @@
 package kegml
 
 import (
+	_ "embed"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/rwxrob/pegn"
 	"github.com/rwxrob/pegn/ast"
+	"github.com/rwxrob/pegn/scanner"
 )
+
+//go:embed kegml.pegn
+var PEGN string
 
 const (
 	Untyped int = iota
@@ -47,4 +56,21 @@ func ParseTitle(s pegn.Scanner) *ast.Node {
 		return nil
 	}
 	return &ast.Node{T: Title, V: string(buf)}
+}
+
+// ReadTitle reads a KEG node title from KEGML file.
+func ReadTitle(path string) (string, error) {
+	if !strings.HasSuffix(path, `README.md`) {
+		path = filepath.Join(path, `README.md`)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	s := scanner.New(f)
+	nd := ParseTitle(s)
+	if nd == nil {
+		return "", s
+	}
+	return nd.V, nil
 }

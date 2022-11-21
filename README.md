@@ -8,8 +8,7 @@ to allow collaboration and exploration of different directions.*
 
 This `keg` [Bonzai](https://github.com/rwxrob/bonzai) branch contains
 all KEG related commands, most of which are exported so they can be
-composed individually if preferred (for example, `keg.MarkCmd` for
-parsing KEG Mark markup language in other converter utilities).
+composed individually if preferred.
 
 ## Install
 
@@ -86,9 +85,6 @@ keg nodes - print the KEGNODES file
 keg nodes NODEPATTERN - list nodes matching pattern
 keg update [KEG] - update KEGNODES (and /index)
 keg sync - update current KEG and fetch all FOLLOWS
-
-keg slug TEXT - convert TEXT into slug suitable for node directory name
-keg slug <<< TEXT - convert TEXT into slug
 
 keg update - updates own KEGNODES, names, links, and follow cache
 

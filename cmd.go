@@ -157,7 +157,9 @@ var deleteCmd = &Z.Cmd{
 		}
 		id := args[0]
 		if id == "last" {
-			id = Last(keg.Path)
+			if n := Last(keg.Path); n != nil {
+				id = n.ID()
+			}
 		}
 		_, err = strconv.Atoi(id)
 		if err != nil {
@@ -173,7 +175,7 @@ var deleteCmd = &Z.Cmd{
 		if err != nil {
 			return err
 		}
-		return nil
+		return Publish(keg.Path)
 	},
 }
 
@@ -305,11 +307,14 @@ var initCmd = &Z.Cmd{
 		if err := file.Edit(`keg`); err != nil {
 			return err
 		}
-		if dir, err := os.Getwd(); err != nil {
+		dir, err := os.Getwd()
+		if err != nil {
 			return err
-		} else {
-			return MakeDex(dir)
 		}
+		if err := MakeDex(dir); err != nil {
+			return err
+		}
+		return Publish(dir)
 	},
 }
 
@@ -326,7 +331,9 @@ var editCmd = &Z.Cmd{
 		}
 		id := args[0]
 		if id == "last" {
-			id = Last(keg.Path)
+			if n := Last(keg.Path); n != nil {
+				id = n.ID()
+			}
 		} else {
 			_, err := strconv.Atoi(id)
 			if err != nil {
@@ -361,7 +368,10 @@ var editCmd = &Z.Cmd{
 		if err := file.Edit(path); err != nil {
 			return err
 		}
-		return MakeDex(keg.Path)
+		if err := MakeDex(keg.Path); err != nil {
+			return err
+		}
+		return Publish(keg.Path)
 	},
 }
 
@@ -397,7 +407,7 @@ var createCmd = &Z.Cmd{
 		}
 		hd, _ := file.Head(filepath.Join(keg.Path, `dex`, `latest.md`), 1)
 		fmt.Println(hd[0])
-		return nil
+		return Publish(keg.Path)
 	},
 }
 

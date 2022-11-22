@@ -25,7 +25,7 @@ type Local struct {
 type DexEntry struct {
 	U time.Time // updated
 	T string    // title
-	N int       // node id
+	N int       // node id (also see ID)
 }
 
 // MarshalJSON produces JSON text that contains one DexEntry per line
@@ -48,6 +48,10 @@ func (e DexEntry) TSV() string {
 
 // String fulfills the fmt.Stringer interface as a markdown link.
 func (e DexEntry) String() string { return e.TSV() }
+
+// ID returns the node identifier as a string instead of an integer.
+// Returns an empty string if unable to parse the integer.
+func (e DexEntry) ID() string { return strconv.Itoa(e.N) }
 
 // MD returns the entry as a single Markdown list item for inclusion in
 // the dex/nodex.md file:

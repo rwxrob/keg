@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	Z "github.com/rwxrob/bonzai/z"
+	"github.com/rwxrob/fs"
 	_fs "github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/keg/kegml"
@@ -173,19 +175,20 @@ func Updated(kegpath string) (*time.Time, error) {
 	return &t, nil
 }
 
-var IdFromNodeInclude = regexp.MustCompile(`\(/(\d+)\)(?:\n|$)`)
-
-// Last parses and returns the ID of the most recently
+// Last parses and returns a DexEntry of the most recently
 // updated node from first line of the dex/latest.md file. If cannot
-// determine returns empty string. Will panic if latest.md contains
-// anything but specified list items.
-func Last(kegpath string) string {
+// determine returns nil.
+func Last(kegpath string) *DexEntry {
 	kegfile := filepath.Join(kegpath, `dex`, `latest.md`)
 	lines, err := file.Head(kegfile, 1)
 	if err != nil || len(lines) == 0 {
-		return ""
+		return nil
 	}
-	return IdFromNodeInclude.FindStringSubmatch(lines[0])[1]
+	dex, err := ParseDex(lines[0])
+	if err != nil {
+		return nil
+	}
+	return &(*dex)[0]
 }
 
 // UpdatedString returns Updated time as a string or an empty string if
@@ -199,22 +202,24 @@ func UpdatedString(kegpath string) string {
 	return (*u).Format(IsoDateFmt)
 }
 
-// Glob2Regx returns a new, compiled regular expression from
-// a traditional glob syntax.
-//
-//     *       -> .*
-//     ?       -> .
-//     {3..22} -> (?:[3-9]|1[0-9]|2[0-2])
-//     [abc]   -> [abc]
-//     [0-9]   -> [0-9]
-//
-func Glob2Regx(glob string) *regexp.Regexp {
-	// TODO
-	return nil
-}
-
-func Find(exp string) *Dex {
-	var dex Dex
-	// TODO
-	return &dex
+// Publish publishes the keg at kegpath location to its distribution
+// targets listed in the keg file under "publish." Currently, this only
+// involves looking for a .git directory and if found doing a git push.
+// Git commit messages are always based on the latest node title without
+// any verb.
+func Publish(kegpath string) error {
+	if fs.NotExists(filepath.Join(kegpath, `.git`)) {
+		return nil
+	}
+	if err := Z.Exec(`git`, `-C`, kegpath, `add`, `-A`, `.`); err != nil {
+		return err
+	}
+	msg := "Publish changes"
+	if n := Last(kegpath); n != nil {
+		msg = n.T
+	}
+	if err := Z.Exec(`git`, `-C`, kegpath, `commit`, `-m`, msg); err != nil {
+		return err
+	}
+	return Z.Exec(`git`, `-C`, kegpath, `push`)
 }

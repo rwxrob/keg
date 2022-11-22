@@ -19,6 +19,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mikefarah/yq/v4 v4.25.1 // indirect
+	github.com/rwxrob/choose v0.0.0-20221119173308-edb225d7e419 // indirect
 	github.com/rwxrob/compcmd v0.3.0 // indirect
 	github.com/rwxrob/compfile v0.1.12 // indirect
 	github.com/rwxrob/fn v0.3.3 // indirect

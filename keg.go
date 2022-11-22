@@ -1,6 +1,8 @@
 package keg
 
 import (
+	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -8,11 +10,13 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	_fs "github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/keg/kegml"
+	"github.com/rwxrob/to"
 )
 
 // NodePaths returns a list of node directory paths contained in the
@@ -27,6 +31,43 @@ import (
 // File and directories that do not have an integer name will be
 // ignored.
 var NodePaths = _fs.IntDirs
+
+var LatestDexEntryExp = regexp.MustCompile(
+	`^\* (\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ) \[(.*)\]\(/(\d+)\)$`,
+)
+
+// ParseDex parses any input valid for to.String into a Dex pointer.
+// FIXME: replace regular expression with pegn.Scanner instead
+func ParseDex(in any) (*Dex, error) {
+	dex := Dex{}
+	s := bufio.NewScanner(strings.NewReader(to.String(in)))
+	for line := 1; s.Scan(); line++ {
+		f := LatestDexEntryExp.FindStringSubmatch(s.Text())
+		if len(f) != 4 {
+			return nil, fmt.Errorf("bad line in latest.md: %v", line)
+		}
+		if t, err := time.Parse(IsoDateFmt, string(f[1])); err != nil {
+			return nil, err
+		} else {
+			if i, err := strconv.Atoi(f[3]); err != nil {
+				return nil, err
+			} else {
+				dex = append(dex, DexEntry{U: t, T: f[2], N: i})
+			}
+		}
+	}
+	return &dex, nil
+}
+
+// ReadDex reads an existing dex/latest.md dex and returns it.
+func ReadDex(kegdir string) (*Dex, error) {
+	f := filepath.Join(kegdir, `dex`, `latest.md`)
+	buf, err := os.ReadFile(f)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDex(buf)
+}
 
 // ScanDex takes the target path to a keg root directory returns a
 // Dex object.
@@ -54,20 +95,26 @@ func ScanDex(kegdir string) (*Dex, error) {
 // MakeDex calls ScanDex and writes (or overwrites) the output to the
 // reserved dex node file within the kegdir passed. File-level
 // locking is attempted using the go-internal/lockedfile (used by Go
-// itself).
+// itself). Both a friendly markdown file reverse sorted by time of last
+// update (latest.md) and a tab-delimited file sorted numerically by
+// node ID (nodes.tsv) are created.
 func MakeDex(kegdir string) error {
 	dex, err := ScanDex(kegdir)
 	if err != nil {
 		return err
 	}
-	jsonpath := filepath.Join(kegdir, `dex`, `nodes.json`)
-	if err := file.Overwrite(jsonpath, dex.String()); err != nil {
-		return err
-	}
-	mdpath := filepath.Join(kegdir, `dex`, `nodes.md`)
+
+	// markdown is first since reverse chrono of updates is default
+	mdpath := filepath.Join(kegdir, `dex`, `latest.md`)
 	if err := file.Overwrite(mdpath, dex.MD()); err != nil {
 		return err
 	}
+
+	tsvpath := filepath.Join(kegdir, `dex`, `nodes.tsv`)
+	if err := file.Overwrite(tsvpath, dex.ByID().TSV()); err != nil {
+		return err
+	}
+
 	return UpdateUpdated(kegdir)
 }
 
@@ -112,17 +159,31 @@ func UpdateUpdated(kegpath string) error {
 // (the first line) and returns the time stamp it contains as
 // a time.Time. If a time stamp could not be determined returns time.
 func Updated(kegpath string) (*time.Time, error) {
-	kegfile := filepath.Join(kegpath, `dex`, `nodes.md`)
-	str, err := file.FindString(kegfile, IsoDateExpStrMD)
+	kegfile := filepath.Join(kegpath, `dex`, `latest.md`)
+	str, err := file.FindString(kegfile, IsoDateExpStr)
 	if err != nil {
 		return nil, err
 	}
-	t, err := time.Parse(IsoDateFmtMD, str)
+	t, err := time.Parse(IsoDateFmt, str)
 	if err != nil {
 		return nil, err
 	}
-
 	return &t, nil
+}
+
+var IdFromNodeInclude = regexp.MustCompile(`\(/(\d+)\)(?:\n|$)`)
+
+// Last parses and returns the ID of the most recently
+// updated node from first line of the dex/latest.md file. If cannot
+// determine returns empty string. Will panic if latest.md contains
+// anything but specified list items.
+func Last(kegpath string) string {
+	kegfile := filepath.Join(kegpath, `dex`, `latest.md`)
+	lines, err := file.Head(kegfile, 1)
+	if err != nil || len(lines) == 0 {
+		return ""
+	}
+	return IdFromNodeInclude.FindStringSubmatch(lines[0])[1]
 }
 
 // UpdatedString returns Updated time as a string or an empty string if

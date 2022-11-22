@@ -29,6 +29,8 @@ github.com/mikefarah/yq/v4 v4.25.1/go.mod h1:S+m9R9Qq17v0Mg/DtaESrbvfvrgbrOEMlEs
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rwxrob/bonzai v0.14.1 h1:v0ItthDiXV7MXRAw7nyTIgsnQn8ZM/VeTCuXJOwVPsw=
 github.com/rwxrob/bonzai v0.14.1/go.mod h1:hap+YriuJgncCLUgF6JJgLeldo3ggGVk+4s1G/FFSDk=
+github.com/rwxrob/choose v0.0.0-20221119173308-edb225d7e419 h1:EEK3ykphfRo5N9zR3eZqu4xkKk1THPl6Zhdqsr1f4eU=
+github.com/rwxrob/choose v0.0.0-20221119173308-edb225d7e419/go.mod h1:mhuV7pY/62p1sZCvCGVET5GuF+Z126hKxqnzSUOO0EU=
 github.com/rwxrob/compcmd v0.3.0 h1:AlJNItb7+Yk17qmH5E7TJFyBXhna/rS3NeQAgjqbFls=
 github.com/rwxrob/compcmd v0.3.0/go.mod h1:XOHl6bS2Uen6Wx2mxtbtUhT8Sbz1IhnaE55xPkhTBD4=
 github.com/rwxrob/compfile v0.1.12 h1:n3JrOa8lOXY1emdZ2C8FrN+VsJfttIQZz71AehTuhfo=

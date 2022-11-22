@@ -28,8 +28,26 @@ func ExampleNodePaths() {
 func ExampleUpdatedString() {
 	fmt.Println(keg.UpdatedString(`testdata/samplekeg`))
 	// Output:
-	// 2022-11-17T18:34:10Z
+	// 2022-11-17 18:34:10Z
 }
+
+/*
+func ExampleDex_WithTitleText() {
+	dex, _ := keg.ReadDex(`testdata/samplekeg`)
+	fmt.Println(dex.WithTitleText(`5`).TSV())
+	// Output:
+	// ignored
+}
+*/
+
+/*
+func ExampleReadDex() {
+	dex, _ := keg.ReadDex(`testdata/samplekeg`)
+	fmt.Println(dex.TSV())
+	// Output:
+	// ignored
+}
+*/
 
 /*
 func ExampleUpdateUpdated() {

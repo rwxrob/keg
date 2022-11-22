@@ -3,19 +3,25 @@ package keg
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rwxrob/json"
 )
 
-const IsoDateFmt = `2006-01-02T15:04:05Z`
-const IsoDateFmtMD = `2006-01-02 15:04:05Z`
-const IsoDateExpStr = `\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ`
-const IsoDateExpStrMD = `\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ`
+const IsoDateFmt = `2006-01-02 15:04:05Z`
+const IsoDateExpStr = `\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ`
 
-// DexEntry represents a single line in the dex/nodes.md or
-// dex/nodes.json file. All three fields are always required.
+// Local contains a name to full path mapping for kegs stored locally.
+type Local struct {
+	Name string
+	Path string
+}
+
+// DexEntry represents a single line in an index (usually the latest.md
+// or nodes.tsv file). All three fields are always required.
 type DexEntry struct {
 	U time.Time // updated
 	T string    // title
@@ -36,15 +42,12 @@ func (e *DexEntry) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// String fulfills the fmt.Stringer interface as JSON. Any error returns
-// a "null" string.
-func (e DexEntry) String() string {
-	byt, err := e.MarshalJSON()
-	if err != nil {
-		return "null"
-	}
-	return string(byt)
+func (e DexEntry) TSV() string {
+	return fmt.Sprintf("%v\t%v\t%v", e.N, e.U.Format(IsoDateFmt), e.T)
 }
+
+// String fulfills the fmt.Stringer interface as a markdown link.
+func (e DexEntry) String() string { return e.TSV() }
 
 // MD returns the entry as a single Markdown list item for inclusion in
 // the dex/nodex.md file:
@@ -56,19 +59,21 @@ func (e DexEntry) String() string {
 // Note that the second of last change is based on *any* file within the
 // node directory changing, not just the README.md or meta files.
 func (e DexEntry) MD() string {
-
 	return fmt.Sprintf(
-		"* %v [%v](/%v)\n",
-		e.U.Format(IsoDateFmtMD),
+		"* %v [%v](/%v)",
+		e.U.Format(IsoDateFmt),
 		e.T, e.N,
 	)
 }
 
+// Asinclude returns a KEGML include link list item without the time
+// suitable for creating include blocks in node files.
+func (e DexEntry) AsInclude() string {
+	return fmt.Sprintf("* [%v](/%v)", e.T, e.N)
+}
+
 // Dex is a collection of DexEntry structs. This allows mapping methods
-// for its serialization to either the dex/nodes.md or dex/nodes.json or
-// other output formats. Marshaling a Dex is unique in that each
-// DexEntry is on its own line and there is never any HTML escaping of
-// any JSON value (unlike standard JSON marshaling).
+// for its serialization to different output formats.
 type Dex []DexEntry
 
 // MarshalJSON produces JSON text that contains one DexEntry per line
@@ -88,20 +93,54 @@ func (d *Dex) MarshalJSON() ([]byte, error) {
 
 // String fulfills the fmt.Stringer interface as JSON. Any error returns
 // a "null" string.
-func (e Dex) String() string {
-	byt, err := e.MarshalJSON()
-	if err != nil {
-		return "null"
-	}
-	return string(byt)
-}
+func (e Dex) String() string { return e.TSV() }
 
 // MD renders the entire Dex as a Markdown list suitable for the
-// dex/nodes.md file.
+// standard dex/latest.md file.
 func (e Dex) MD() string {
 	var str string
 	for _, entry := range e {
-		str += entry.MD()
+		str += entry.MD() + "\n"
 	}
 	return str
+}
+
+// AsIncludes renders the entire Dex as a KEGML include list (markdown
+// bulleted list) and cab be useful from within editing sessions to
+// include from the current keg without leaving the terminal editor.
+func (e Dex) AsIncludes() string {
+	var str string
+	for _, entry := range e {
+		str += entry.AsInclude() + "\n"
+	}
+	return str
+}
+
+// TSV renders the entire Dex as a loadable tab-separated values file.
+func (e Dex) TSV() string {
+	var str string
+	for _, entry := range e {
+		str += entry.TSV() + "\n"
+	}
+	return str
+}
+
+// ByID orders the Dex from lowest to highest node ID integer.
+func (e Dex) ByID() Dex {
+	sort.Slice(e, func(i, j int) bool {
+		return e[i].N < e[j].N
+	})
+	return e
+}
+
+// WithTitleText filters all nodes with titles that do not contain the text
+// substring in the title.
+func (e Dex) WithTitleText(keyword string) Dex {
+	dex := Dex{}
+	for _, d := range e {
+		if strings.Index(d.T, keyword) >= 0 {
+			dex = append(dex, d)
+		}
+	}
+	return dex
 }

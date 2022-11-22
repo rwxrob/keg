@@ -138,7 +138,7 @@ func (e Dex) ByID() Dex {
 func (e Dex) WithTitleText(keyword string) Dex {
 	dex := Dex{}
 	for _, d := range e {
-		if strings.Index(d.T, keyword) >= 0 {
+		if strings.Index(strings.ToLower(d.T), strings.ToLower(keyword)) >= 0 {
 			dex = append(dex, d)
 		}
 	}

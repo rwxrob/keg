@@ -40,8 +40,8 @@ var Cmd = &Z.Cmd{
 	Issues:    `github.com/rwxrob/keg/issues`,
 
 	Commands: []*Z.Cmd{
-		help.Cmd, conf.Cmd, vars.Cmd,
-		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd, editCmd,
+		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
+		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
 		latestCmd, titleCmd, initCmd,
 	},
 

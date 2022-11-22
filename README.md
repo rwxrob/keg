@@ -20,7 +20,7 @@ Standalone
 ```
 go install github.com/rwxrob/keg/cmd/keg@latest
 ```
-Or if you prefer
+Or if you prefer (easier to type)
 
 ```
 go install github.com/rwxrob/keg/cmd/kn@latest

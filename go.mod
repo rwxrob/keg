@@ -6,7 +6,7 @@ require (
 	github.com/rwxrob/bonzai v0.19.1
 	github.com/rwxrob/choose v0.0.0-20221119173308-edb225d7e419
 	github.com/rwxrob/conf v0.8.2
-	github.com/rwxrob/fs v0.12.1
+	github.com/rwxrob/fs v0.13.1
 	github.com/rwxrob/help v0.6.0
 	github.com/rwxrob/json v0.8.0
 	github.com/rwxrob/pegn v0.1.0

@@ -4,6 +4,7 @@
 package keg
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -31,8 +32,8 @@ var Cmd = &Z.Cmd{
 	Name:      `keg`,
 	Aliases:   []string{`kn`},
 	Summary:   `manage knowledge exchange graphs (KEG)`,
-	Version:   `v0.0.0`,
-	Copyright: `Copyright 2021 Robert S Muhlestein`,
+	Version:   `v0.1.0`,
+	Copyright: `Copyright 2022 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
 	Site:      `rwxrob.tv`,
 	Source:    `git@github.com:rwxrob/keg.git`,
@@ -41,7 +42,7 @@ var Cmd = &Z.Cmd{
 	Commands: []*Z.Cmd{
 		help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd, editCmd,
-		latestCmd, titleCmd,
+		latestCmd, titleCmd, initCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -55,11 +56,37 @@ var Cmd = &Z.Cmd{
 		management as a Knowledge Exchange Graph (sometimes called "personal
 		knowledge graph" or "zettelkasten"). Using {{cmd .Name}} you can
 		create and share knowledge on the free, decentralized,
-		protocol-agnostic, world-wide, Knowledge Exchange Grid.`,
+		protocol-agnostic, world-wide, Knowledge Exchange Grid.
+
+		Run {{cmd "init"}} inside of a new directory to get started with
+		a new keg. After editing the {{pre "keg"}} file you can create your
+		first node with {{cmd "create"}}.
+		`,
 }
 
 var currentCmd = &Z.Cmd{
-	Name: `current`,
+	Name:     `current`,
+	Summary:  `show the current keg`,
+	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{cmd .Name}} command displays the current keg by name, which is
+		resolved as follows:
+
+		1. The {{pre "KEG_CURRENT"}} environment variable
+		2. The current working directory if {{pre "keg"}} file found
+		3. The {{pre "current"}} var setting (see {{cmd "var"}})
+
+		Note that setting the var forces {{cmd .Name}} to always use that
+		setting until it is explicitly changed or temporarily overridden
+		with {{pre "KEG_CURRENT"}} environment variable.
+
+		It is often useful to have {{pre "current"}} set to the most
+		frequently used keg and then change into the working directory of
+		another, less updated, keg when needed.
+
+	`,
+
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller)
 		if err != nil {
@@ -71,9 +98,11 @@ var currentCmd = &Z.Cmd{
 }
 
 var titleCmd = &Z.Cmd{
-	Name:    `titles`,
-	Aliases: []string{`title`},
-	Summary: `find titles containing keyword`,
+	Name:     `titles`,
+	Aliases:  []string{`title`},
+	Summary:  `find titles containing keyword`,
+	Commands: []*Z.Cmd{help.Cmd},
+
 	Call: func(x *Z.Cmd, args ...string) error {
 		if len(args) == 0 {
 			args = append(args, "")
@@ -98,8 +127,11 @@ var titleCmd = &Z.Cmd{
 }
 
 var dirCmd = &Z.Cmd{
-	Name:    `dir`,
-	Aliases: []string{`d`},
+	Name:     `dir`,
+	Aliases:  []string{`d`},
+	Summary:  `print path to directory of current keg`,
+	Commands: []*Z.Cmd{help.Cmd},
+
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller)
 		if err != nil {
@@ -117,6 +149,7 @@ var deleteCmd = &Z.Cmd{
 	Usage:    `(help|INTEGER_NODE_ID|last)`,
 	MinArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
+
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller)
 		if err != nil {
@@ -155,6 +188,13 @@ func current(x *Z.Cmd) (*Local, error) {
 		return &Local{Path: dir, Name: name}, nil
 	}
 
+	// check if current working directory has a keg
+	dir, _ = os.Getwd()
+	if fs.Exists(filepath.Join(dir, `keg`)) {
+		name = filepath.Base(dir)
+		return &Local{Path: dir, Name: name}, nil
+	}
+
 	// check vars and conf
 	name, _ = x.Get(`current`)
 	if name != "" {
@@ -165,36 +205,25 @@ func current(x *Z.Cmd) (*Local, error) {
 		}
 	}
 
-	// map entry that matches executable
-	dir, _ = x.C(`map.` + Z.ExeName)
-	if !(dir == "" || dir == "null") {
-		dir = fs.Tilde2Home(dir)
-		return &Local{Path: dir, Name: Z.ExeName}, nil
-	}
-
-	// check if current working directory has a keg
-	dir, _ = os.Getwd()
-	if fs.Exists(filepath.Join(dir, `keg`)) {
-		name = filepath.Base(dir)
-		return &Local{Path: dir, Name: name}, nil
-	}
-
 	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
 var dexCmd = &Z.Cmd{
 	Name:     `dex`,
+	Commands: []*Z.Cmd{help.Cmd, dexUpdateCmd},
+	Summary:  `work with indexes`,
+}
+
+var dexUpdateCmd = &Z.Cmd{
+	Name:     `update`,
 	Commands: []*Z.Cmd{help.Cmd},
-	Params:   []string{`update`},
+	Summary:  `update dex/latest.md and dex/nodes.tsv`,
 	Call: func(x *Z.Cmd, args ...string) error {
-		keg, err := current(x.Caller)
+		keg, err := current(x.Caller.Caller) // keg dex update
 		if err != nil {
 			return err
 		}
-		if len(args) > 0 && args[0] == `update` {
-			return MakeDex(keg.Path)
-		}
-		return nil
+		return MakeDex(keg.Path)
 	},
 }
 
@@ -238,11 +267,41 @@ var latestCmd = &Z.Cmd{
 	},
 }
 
+//go:embed testdata/samplekeg/keg
+var DefaultInfoFile string
+
+//go:embed testdata/samplekeg/0/README.md
+var DefaultZeroNode string
+
+var initCmd = &Z.Cmd{
+	Name:     `init`,
+	Summary:  `initialize current working dir as new keg`,
+	Commands: []*Z.Cmd{help.Cmd},
+	Call: func(_ *Z.Cmd, _ ...string) error {
+		if fs.NotExists(`keg`) {
+			if err := file.Overwrite(`keg`, DefaultInfoFile); err != nil {
+				return err
+			}
+		}
+		if err := file.Overwrite(`0/README.md`, DefaultZeroNode); err != nil {
+			return err
+		}
+		if err := file.Edit(`keg`); err != nil {
+			return err
+		}
+		if dir, err := os.Getwd(); err != nil {
+			return err
+		} else {
+			return MakeDex(dir)
+		}
+	},
+}
+
 var editCmd = &Z.Cmd{
 	Name:     `edit`,
 	Aliases:  []string{`e`},
 	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
-	Summary:  `edit a specific node README.md file`,
+	Summary:  `choose and edit a specific node`,
 	Commands: []*Z.Cmd{help.Cmd},
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller)
@@ -278,7 +337,7 @@ var editCmd = &Z.Cmd{
 var createCmd = &Z.Cmd{
 	Name:     `create`,
 	Aliases:  []string{`c`},
-	Summary:  `create KEG content node`,
+	Summary:  `create and edit content node`,
 	MaxArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
 
@@ -296,7 +355,7 @@ var createCmd = &Z.Cmd{
 		}
 		_, _, high := NodePaths(keg.Path)
 		if high < 0 {
-			return fmt.Errorf(`Can't determine last id: %v`, keg.Path)
+			high = 0
 		}
 		high++
 		if err := ImportNode(path.Dir(readme), keg.Path, strconv.Itoa(high)); err != nil {

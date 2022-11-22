@@ -27,7 +27,7 @@ func ExampleDex_string() {
 	fmt.Println(d)
 	fmt.Println(d.MD())
 	// Output:
-	// * 2022-12-10 06:10:04Z [Some title](/2)
+	// 2	2022-12-10 06:10:04Z	Some title
 	// * 2022-12-10 06:10:04Z [Some title](/2)
 }
 

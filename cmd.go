@@ -145,7 +145,7 @@ var dirCmd = &Z.Cmd{
 var deleteCmd = &Z.Cmd{
 	Name:     `delete`,
 	Summary:  `delete node by ID from current keg`,
-	Aliases:  []string{`del`},
+	Aliases:  []string{`del`, `rm`},
 	Usage:    `(help|INTEGER_NODE_ID|last)`,
 	MinArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
@@ -275,8 +275,24 @@ var DefaultZeroNode string
 
 var initCmd = &Z.Cmd{
 	Name:     `init`,
+	Usage:    `(help)`,
 	Summary:  `initialize current working dir as new keg`,
 	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{cmd .Name}} command creates a {{pre "keg"}} YAML file in the
+		current working directory and opens it up for editing. 
+
+		{{cmd .Name}} also creates a **zero node** (/0) typically used for
+		linking to planned content from other content nodes. 
+
+		Finally, {{cmd .Name}} creates the {{pre "dex/latest.md"}} and 
+		{{pre "dex/nodex.tsv"}} index files and updates the {{pre "keg"}} file
+		update field to match the latest update (effectively the same as calling
+		{{cmd "dex update"}}).
+
+	`,
+
 	Call: func(_ *Z.Cmd, _ ...string) error {
 		if fs.NotExists(`keg`) {
 			if err := file.Overwrite(`keg`, DefaultInfoFile); err != nil {

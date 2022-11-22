@@ -328,15 +328,30 @@ var editCmd = &Z.Cmd{
 		if id == "last" {
 			id = Last(keg.Path)
 		} else {
-
 			_, err := strconv.Atoi(id)
 			if err != nil {
 				dex, err := ReadDex(keg.Path)
 				if err != nil {
 					return err
 				}
-				choice, err := choose.Choices[DexEntry](dex.WithTitleText(strings.Join(args, " "))).Choose()
-				id = strconv.Itoa(choice.N)
+				key := strings.Join(args, " ")
+				hits := dex.WithTitleText(key)
+				switch len(hits) {
+				case 1:
+					id = strconv.Itoa(hits[0].N)
+				case 0:
+					return fmt.Errorf("no titles match: %v", key)
+				default:
+					choice, err := choose.Choices[DexEntry](hits).Choose()
+					if err != nil {
+						return err
+					}
+					if choice.T == "" {
+						return nil
+					}
+					return nil
+					id = strconv.Itoa(choice.N)
+				}
 			}
 		}
 		path := filepath.Join(keg.Path, id, `README.md`)

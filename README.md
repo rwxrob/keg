@@ -6,9 +6,7 @@ to allow collaboration and exploration of different directions.*
 [![GoDoc](https://godoc.org/github.com/rwxrob/keg?status.svg)](https://godoc.org/github.com/rwxrob/keg)
 [![License](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](LICENSE)
 
-This `keg` [Bonzai](https://github.com/rwxrob/bonzai) branch contains
-all KEG related commands, most of which are exported so they can be
-composed individually if preferred.
+This `keg` [Bonzai](https://github.com/rwxrob/bonzai) branch contains all KEG related commands, most of which are exported so they can be composed individually if preferred.
 
 ## Install
 

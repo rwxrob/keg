@@ -61,6 +61,12 @@ var Cmd = &Z.Cmd{
 		Run {{cmd "init"}} inside of a new directory to get started with
 		a new keg. After editing the {{pre "keg"}} file you can create your
 		first node with {{cmd "create"}}.
+
+		For more about the emerging KEG 2023-01 specification and how to
+		create content that complies for knowledge exchange and publication
+		(while we work more on linting and validation within the {{cmd .Name}}
+		command) have a look at https://github.com/rwxrob/keg-spec
+
 		`,
 }
 

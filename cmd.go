@@ -331,7 +331,11 @@ var editCmd = &Z.Cmd{
 	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
 	Summary:  `choose and edit a specific node`,
 	Commands: []*Z.Cmd{help.Cmd},
+
 	Call: func(x *Z.Cmd, args ...string) error {
+		if !term.IsInteractive() {
+			return titleCmd.Call(x, args...)
+		}
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err

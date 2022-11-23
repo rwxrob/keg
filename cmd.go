@@ -239,8 +239,12 @@ var latestCmd = &Z.Cmd{
 	Name:     `latest`,
 	Aliases:  []string{`last`},
 	Summary:  `show last nodes changed (markdown)`,
-	MaxArgs:  1,
-	Commands: []*Z.Cmd{help.Cmd},
+	UseVars:  true,
+	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
+	Shortcuts: Z.ArgMap{
+		`default`: {`var`, `get`, `default`},
+		`set`:     {`var`, `set`},
+	},
 	Call: func(x *Z.Cmd, args ...string) error {
 		var err error
 		n := 1
@@ -248,6 +252,14 @@ var latestCmd = &Z.Cmd{
 			n, err = strconv.Atoi(args[0])
 			if err != nil {
 				return err
+			}
+		} else {
+			def, err := x.Get(`default`)
+			if err == nil && def != "" {
+				n, err = strconv.Atoi(def)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		keg, err := current(x.Caller)

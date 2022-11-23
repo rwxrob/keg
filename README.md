@@ -1,8 +1,5 @@
 # 🌳 KEG Commands
 
-*🚧This project is in active preliminary development. Commits are public
-to allow collaboration and exploration of different directions.*
-
 [![GoDoc](https://godoc.org/github.com/rwxrob/keg?status.svg)](https://godoc.org/github.com/rwxrob/keg)
 [![License](https://img.shields.io/badge/license-Apache2-brightgreen.svg)](LICENSE)
 

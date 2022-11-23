@@ -109,8 +109,6 @@ func MakeDex(kegdir string) error {
 	// markdown is first since reverse chrono of updates is default
 	mdpath := filepath.Join(kegdir, `dex`, `latest.md`)
 	if err := file.Overwrite(mdpath, dex.MD()); err != nil {
-		log.Print("made")
-
 		return err
 	}
 

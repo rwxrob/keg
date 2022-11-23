@@ -124,7 +124,7 @@ var titleCmd = &Z.Cmd{
 			return err
 		}
 		if term.IsInteractive() {
-			fmt.Print(dex.WithTitleText(str))
+			fmt.Print(dex.WithTitleText(str).Pretty())
 		} else {
 			fmt.Print(dex.WithTitleText(str).AsIncludes())
 		}
@@ -267,7 +267,7 @@ var latestCmd = &Z.Cmd{
 			return nil
 		}
 		if term.IsInteractive() {
-			fmt.Print(dex)
+			fmt.Print(dex.Pretty())
 		} else {
 			fmt.Print(dex.AsIncludes())
 		}
@@ -327,6 +327,7 @@ var initCmd = &Z.Cmd{
 var editCmd = &Z.Cmd{
 	Name:     `edit`,
 	Aliases:  []string{`e`},
+	MinArgs:  1,
 	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
 	Summary:  `choose and edit a specific node`,
 	Commands: []*Z.Cmd{help.Cmd},
@@ -355,15 +356,14 @@ var editCmd = &Z.Cmd{
 				case 0:
 					return fmt.Errorf("no titles match: %v", key)
 				default:
-					choice, err := choose.Choices[DexEntry](hits).Choose()
+					i, _, err := choose.From(hits.PrettyLines())
 					if err != nil {
 						return err
 					}
-					if choice.T == "" {
+					if i < 0 {
 						return nil
 					}
-					return nil
-					id = strconv.Itoa(choice.N)
+					id = strconv.Itoa(hits[i].N)
 				}
 			}
 		}

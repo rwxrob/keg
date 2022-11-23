@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rwxrob/json"
+	"github.com/rwxrob/term"
 )
 
 const IsoDateFmt = `2006-01-02 15:04:05Z`
@@ -46,9 +47,6 @@ func (e DexEntry) TSV() string {
 	return fmt.Sprintf("%v\t%v\t%v", e.N, e.U.Format(IsoDateFmt), e.T)
 }
 
-// String fulfills the fmt.Stringer interface as a markdown link.
-func (e DexEntry) String() string { return e.TSV() }
-
 // ID returns the node identifier as a string instead of an integer.
 // Returns an empty string if unable to parse the integer.
 func (e DexEntry) ID() string { return strconv.Itoa(e.N) }
@@ -69,6 +67,9 @@ func (e DexEntry) MD() string {
 		e.T, e.N,
 	)
 }
+
+// String implements fmt.Stringer interface as MD.
+func (e DexEntry) String() string { return e.MD() }
 
 // Asinclude returns a KEGML include link list item without the time
 // suitable for creating include blocks in node files.
@@ -127,6 +128,57 @@ func (e Dex) TSV() string {
 		str += entry.TSV() + "\n"
 	}
 	return str
+}
+
+// Highest returns the highest integer value identifier.
+func (d Dex) Highest() int {
+	var highest int
+	for _, e := range d {
+		if e.N > highest {
+			highest = e.N
+		}
+	}
+	return highest
+}
+
+// Highest returns Highest as string.
+func (d Dex) HighestString() string { return strconv.Itoa(d.Highest()) }
+
+// HighestWidth returns width of highest integer identifier.
+func (d Dex) HighestWidth() int { return len(d.HighestString()) }
+
+// Pretty returns a string with pretty color string with time stamps
+// rendered in more readable way.
+func (d Dex) Pretty() string {
+	var str string
+	nwidth := d.HighestWidth()
+	for _, e := range d {
+		str += fmt.Sprintf(
+			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
+			term.Black, e.U.Format(`2006-01-02 15:03Z`),
+			term.Green, e.N,
+			term.White, e.T,
+			term.Reset,
+		)
+	}
+	return str
+}
+
+// PrettyLines returns Pretty but each line separate and without line
+// return.
+func (d Dex) PrettyLines() []string {
+	lines := make([]string, 0, len(d))
+	nwidth := d.HighestWidth()
+	for _, e := range d {
+		lines = append(lines, fmt.Sprintf(
+			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
+			term.Black, e.U.Format(`2006-01-02 15:03Z`),
+			term.Green, e.N,
+			term.White, e.T,
+			term.Reset,
+		))
+	}
+	return lines
 }
 
 // ByID orders the Dex from lowest to highest node ID integer.

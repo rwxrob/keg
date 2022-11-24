@@ -52,7 +52,7 @@ var Cmd = &Z.Cmd{
 	ConfVars: true,
 
 	Description: `
-		The {{cmd .Name}} command is for personal and public knowledge
+		The {{aka}} command is for personal and public knowledge
 		management as a Knowledge Exchange Graph (sometimes called "personal
 		knowledge graph" or "zettelkasten"). Using {{cmd .Name}} you can
 		create and share knowledge on the free, decentralized,
@@ -124,7 +124,8 @@ var titleCmd = &Z.Cmd{
 			return err
 		}
 		if term.IsInteractive() {
-			fmt.Print(dex.WithTitleText(str).Pretty())
+			//fmt.Print(dex.WithTitleText(str).Pretty())
+			Z.Page(dex.WithTitleText(str).Pretty())
 		} else {
 			fmt.Print(dex.WithTitleText(str).AsIncludes())
 		}
@@ -153,7 +154,6 @@ var deleteCmd = &Z.Cmd{
 	Summary:  `delete node by ID from current keg`,
 	Aliases:  []string{`del`, `rm`},
 	Usage:    `(help|INTEGER_NODE_ID|last)`,
-	MinArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -339,12 +339,14 @@ var initCmd = &Z.Cmd{
 var editCmd = &Z.Cmd{
 	Name:     `edit`,
 	Aliases:  []string{`e`},
-	MinArgs:  1,
 	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
 	Summary:  `choose and edit a specific node`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
+		if len(args) == 0 {
+			return help.Cmd.Call(x, args...)
+		}
 		if !term.IsInteractive() {
 			return titleCmd.Call(x, args...)
 		}

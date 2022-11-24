@@ -3,17 +3,17 @@ module github.com/rwxrob/keg
 go 1.18
 
 require (
-	github.com/rwxrob/bonzai v0.19.1
-	github.com/rwxrob/choose v0.1.0
+	github.com/rwxrob/bonzai v0.20.0
+	github.com/rwxrob/choose v0.2.1
 	github.com/rwxrob/conf v0.8.2
 	github.com/rwxrob/fs v0.13.1
-	github.com/rwxrob/help v0.6.0
+	github.com/rwxrob/help v0.7.0
 	github.com/rwxrob/json v0.8.0
 	github.com/rwxrob/pegn v0.1.0
 	github.com/rwxrob/scan v0.11.0
 	github.com/rwxrob/structs v0.6.0
 	github.com/rwxrob/term v0.2.8
-	github.com/rwxrob/to v0.11.0
+	github.com/rwxrob/to v0.11.2
 	github.com/rwxrob/vars v0.5.0
 )
 

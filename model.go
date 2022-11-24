@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rwxrob/choose"
 	"github.com/rwxrob/json"
 	"github.com/rwxrob/term"
 )
@@ -199,4 +200,26 @@ func (e Dex) WithTitleText(keyword string) Dex {
 		}
 	}
 	return dex
+}
+
+// ChooseWithTitleText returns a single *DexEntry for the keyword
+// passed. If there are more than one then user is prompted to choose
+// from list sent to the terminal.
+func (d Dex) ChooseWithTitleText(key string) *DexEntry {
+	hits := d.WithTitleText(key)
+	switch len(hits) {
+	case 1:
+		return &hits[0]
+	case 0:
+		return nil
+	default:
+		i, _, err := choose.From(hits.PrettyLines())
+		if err != nil {
+			return nil
+		}
+		if i < 0 {
+			return nil
+		}
+		return &hits[i]
+	}
 }

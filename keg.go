@@ -209,6 +209,9 @@ func Publish(kegpath string) error {
 	if fs.NotExists(filepath.Join(kegpath, `.git`)) {
 		return nil
 	}
+	if err := Z.Exec(`git`, `-C`, kegpath, `pull`); err != nil {
+		return err
+	}
 	if err := Z.Exec(`git`, `-C`, kegpath, `add`, `-A`, `.`); err != nil {
 		return err
 	}

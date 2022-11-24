@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	Z "github.com/rwxrob/bonzai/z"
-	"github.com/rwxrob/choose"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/file"
@@ -124,7 +123,6 @@ var titleCmd = &Z.Cmd{
 			return err
 		}
 		if term.IsInteractive() {
-			//fmt.Print(dex.WithTitleText(str).Pretty())
 			Z.Page(dex.WithTitleText(str).Pretty())
 		} else {
 			fmt.Print(dex.WithTitleText(str).AsIncludes())
@@ -136,7 +134,8 @@ var titleCmd = &Z.Cmd{
 var dirCmd = &Z.Cmd{
 	Name:     `dir`,
 	Aliases:  []string{`d`},
-	Summary:  `print path to directory of current keg`,
+	MaxArgs:  1,
+	Summary:  `print path to directory of current keg or node`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -144,7 +143,13 @@ var dirCmd = &Z.Cmd{
 		if err != nil {
 			return err
 		}
-		term.Print(keg.Path)
+		if len(args) > 0 {
+			dex, _ := ReadDex(keg.Path)
+			choice := dex.ChooseWithTitleText(strings.Join(args, " "))
+			term.Print(filepath.Join(keg.Path, strconv.Itoa(choice.N)))
+		} else {
+			term.Print(keg.Path)
+		}
 		return nil
 	},
 }
@@ -367,22 +372,11 @@ var editCmd = &Z.Cmd{
 					return err
 				}
 				key := strings.Join(args, " ")
-				hits := dex.WithTitleText(key)
-				switch len(hits) {
-				case 1:
-					id = strconv.Itoa(hits[0].N)
-				case 0:
-					return fmt.Errorf("no titles match: %v", key)
-				default:
-					i, _, err := choose.From(hits.PrettyLines())
-					if err != nil {
-						return err
-					}
-					if i < 0 {
-						return nil
-					}
-					id = strconv.Itoa(hits[i].N)
+				choice := dex.ChooseWithTitleText(key)
+				if choice == nil {
+					return fmt.Errorf("unable to choose a title")
 				}
+				id = strconv.Itoa(choice.N)
 			}
 		}
 		path := filepath.Join(keg.Path, id, `README.md`)

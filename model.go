@@ -3,13 +3,17 @@ package keg
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/rwxrob/choose"
+	"github.com/rwxrob/fs"
 	"github.com/rwxrob/json"
+	"github.com/rwxrob/keg/kegml"
 	"github.com/rwxrob/term"
 )
 
@@ -28,6 +32,19 @@ type DexEntry struct {
 	U time.Time // updated
 	T string    // title
 	N int       // node id (also see ID)
+}
+
+// Update gets the entry for the target keg at kegpath by looking up the
+// latest change to any file within it and parsing the title.
+func (e *DexEntry) Update(kegpath string) error {
+	var err error
+	dir := filepath.Join(kegpath, e.ID())
+	_, i := fs.LatestChange(dir)
+	if i != nil {
+		e.U = i.ModTime()
+	}
+	e.T, err = kegml.ReadTitle(filepath.Join(dir, `README.md`))
+	return err
 }
 
 // MarshalJSON produces JSON text that contains one DexEntry per line
@@ -182,16 +199,31 @@ func (d Dex) PrettyLines() []string {
 	return lines
 }
 
-// ByID orders the Dex from lowest to highest node ID integer.
-func (e Dex) ByID() Dex {
-	sort.Slice(e, func(i, j int) bool {
-		return e[i].N < e[j].N
+// ByID sorts the Dex from lowest to highest node ID integer. A pointer
+// to self is returned for convenience.
+func (d Dex) ByID() Dex {
+	sort.Slice(d, func(i, j int) bool {
+		return d[i].N < d[j].N
 	})
-	return e
+	return d
 }
 
-// WithTitleText filters all nodes with titles that do not contain the text
-// substring in the title.
+// ByLatest sorts the Dex from most recent update to oldest. A pointer
+// to self is returned for convenience.
+func (d Dex) ByLatest() Dex {
+	sort.Slice(d, func(i, j int) bool {
+		return d[i].U.After(d[j].U)
+	})
+	return d
+}
+
+// Add appends the entry to the Dex.
+func (d *Dex) Add(entry *DexEntry) {
+	(*d) = append((*d), *entry)
+}
+
+// WithTitleText returns a new Dex from self with all nodes that do not
+// contain the text substring in the title filtered out.
 func (e Dex) WithTitleText(keyword string) Dex {
 	dex := Dex{}
 	for _, d := range e {
@@ -222,4 +254,11 @@ func (d Dex) ChooseWithTitleText(key string) *DexEntry {
 		}
 		return &hits[i]
 	}
+}
+
+// Random returns a random entry.
+func (d Dex) Random() *DexEntry {
+	rand.Seed(time.Now().UnixNano())
+	i := rand.Intn(len(d))
+	return &d[i]
 }

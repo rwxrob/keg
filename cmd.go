@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -41,7 +40,7 @@ var Cmd = &Z.Cmd{
 	Commands: []*Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
-		latestCmd, titleCmd, initCmd,
+		latestCmd, titleCmd, initCmd, randomCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -51,11 +50,20 @@ var Cmd = &Z.Cmd{
 	ConfVars: true,
 
 	Description: `
-		The {{aka}} command is for personal and public knowledge
-		management as a Knowledge Exchange Graph (sometimes called "personal
-		knowledge graph" or "zettelkasten"). Using {{cmd .Name}} you can
-		create and share knowledge on the free, decentralized,
-		protocol-agnostic, world-wide, Knowledge Exchange Grid.
+		The {{aka}} command is for personal and public knowledge management
+		as a Knowledge Exchange Graph (sometimes called "personal knowledge
+		graph" or "zettelkasten"). Using {{cmd .Name}} you can create,
+		update, search, and organize everything that passes through your
+		brain that you may want to recall later, for whatever reason: school,
+		training, tribal team knowledge, or publishing a paper, article,
+		blog, or book.
+
+		Getting Started
+
+		1. Create a directory and change into it
+		2. Run the {{cmd "init"}} command
+		3. Update the YAML file it opens
+		4. Exit your editor
 
 		Run {{cmd "init"}} inside of a new directory to get started with
 		a new keg. After editing the {{pre "keg"}} file you can create your
@@ -300,18 +308,18 @@ var DefaultZeroNode string
 
 var initCmd = &Z.Cmd{
 	Name:     `init`,
-	Usage:    `(help)`,
+	Usage:    `[help]`,
 	Summary:  `initialize current working dir as new keg`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Description: `
-		The {{cmd .Name}} command creates a {{pre "keg"}} YAML file in the
+		The {{aka}} command creates a {{pre "keg"}} YAML file in the
 		current working directory and opens it up for editing. 
 
-		{{cmd .Name}} also creates a **zero node** (/0) typically used for
+		{{aka}} also creates a **zero node** (/0) typically used for
 		linking to planned content from other content nodes. 
 
-		Finally, {{cmd .Name}} creates the {{pre "dex/latest.md"}} and 
+		Finally, {{aka}} creates the {{pre "dex/latest.md"}} and 
 		{{pre "dex/nodex.tsv"}} index files and updates the {{pre "keg"}} file
 		update field to match the latest update (effectively the same as calling
 		{{cmd "dex update"}}).
@@ -399,32 +407,21 @@ var createCmd = &Z.Cmd{
 	Summary:  `create and edit content node`,
 	MaxArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
-
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
-		readme, err := MkTempNode()
+		entry, err := MakeNode(keg.Path)
 		if err != nil {
 			return err
 		}
-		if err := file.Edit(readme); err != nil {
+		if err := Edit(keg.Path, entry.N); err != nil {
 			return err
 		}
-		_, _, high := NodePaths(keg.Path)
-		if high < 0 {
-			high = 0
-		}
-		high++
-		if err := ImportNode(path.Dir(readme), keg.Path, strconv.Itoa(high)); err != nil {
+		if err := DexUpdate(keg.Path, entry); err != nil {
 			return err
 		}
-		if err := MakeDex(keg.Path); err != nil {
-			return err
-		}
-		hd, _ := file.Head(filepath.Join(keg.Path, `dex`, `latest.md`), 1)
-		fmt.Println(hd[0])
 		return Publish(keg.Path)
 	},
 }
@@ -481,3 +478,51 @@ var nodeParseCmd = &Z.Cmd{
 	`,
 }
 */
+
+var randomCmd = &Z.Cmd{
+	Name:     `random`,
+	Aliases:  []string{`rand`},
+	Usage:    `[help|title|id|dir|edit]`,
+	Params:   []string{`title`, `id`, `dir`, `edit`},
+	MaxArgs:  1,
+	Summary:  `return random node, gamify content editing`,
+	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{aka}} command randomizes the selection of a single node and
+		returns the title, id, or directory; or opens the editor on a random
+		node.
+
+		One of the core tenets of the Zettelkasten approach is regularly and
+		randomly reviewing the knowledge that is stored in it to bring it to
+		the forefront of your mind so that it can inspire new ideas. Looking
+		at a random content node is one way to accomplish this and break
+		writers block by giving you something random to focus on to get you
+		started.
+
+    Defaults to {{pre "edit"}} if no argument given.
+	`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		if len(args) == 0 {
+			args = append(args, `edit`)
+		}
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
+		}
+		dex, err := ReadDex(keg.Path)
+		r := dex.Random()
+		switch args[0] {
+		case `id`:
+			term.Print(r.N)
+		case `title`:
+			term.Print(r.T)
+		case `edit`:
+			return editCmd.Call(x, strconv.Itoa(r.N))
+		case `dir`:
+			term.Print(filepath.Join(strconv.Itoa(r.N)))
+		}
+		return nil
+	},
+}

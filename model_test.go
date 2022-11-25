@@ -50,3 +50,26 @@ func ExampleDex_Pretty() {
 	// ignored
 }
 */
+
+/*
+func ExampleDex_Random() {
+	date := time.Date(2022, 12, 10, 6, 10, 4, 0, time.UTC)
+	dex := keg.Dex{
+		{U: date, N: 2, T: `Some title`},
+		{U: date, N: 3, T: `Other title`},
+		{U: date, N: 4, T: `Another title`},
+		{U: date, N: 5, T: `Yet another title`},
+	}
+	fmt.Println(dex.Random())
+	// Output:
+	// ignored
+}
+*/
+
+func ExampleHaveDex() {
+	fmt.Println(keg.HaveDex(`testdata/samplekeg`))
+	fmt.Println(keg.HaveDex(`testdata/nothing`))
+	// Output:
+	// true
+	// false
+}

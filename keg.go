@@ -16,6 +16,7 @@ import (
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/fs"
 	_fs "github.com/rwxrob/fs"
+	"github.com/rwxrob/fs/dir"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/keg/kegml"
 	"github.com/rwxrob/to"
@@ -223,4 +224,91 @@ func Publish(kegpath string) error {
 		return err
 	}
 	return Z.Exec(`git`, `-C`, kegpath, `push`)
+}
+
+// MakeNode examines the keg at kegpath for highest integer identifier
+// and provides a new one returning a *DexEntry for it.
+func MakeNode(kegpath string) (*DexEntry, error) {
+	_, _, high := NodePaths(kegpath)
+	if high < 0 {
+		high = 0
+	}
+	high++
+	path := filepath.Join(kegpath, strconv.Itoa(high))
+	if err := dir.Create(path); err != nil {
+		return nil, err
+	}
+	readme := filepath.Join(kegpath, `dex`, `README.md`)
+	if err := file.Touch(readme); err != nil {
+		return nil, err
+	}
+	return &DexEntry{N: high}, nil
+}
+
+// Edit calls file.Edit on the given node README.md file within the
+// given kegpath.
+func Edit(kegpath string, id int) error {
+	node := strconv.Itoa(id)
+	if node == "" {
+		return fmt.Errorf(`node (%q) is not a valid node id`, id)
+	}
+	readme := filepath.Join(kegpath, node, `README.md`)
+	return file.Edit(readme)
+}
+
+// DexUpdate first checks the keg at kegpath for an existing
+// dex/latest.md file and if found loads it, if not, MakeDex is called
+// to create it. Then DexUpdate examines the Dex for the DexEntry passed
+// and if found updates it with the new information, otherwise, it will
+// add the new entry without any further validation. The updated Dex is
+// then written to the dex/latest.md file.
+func DexUpdate(kegpath string, entry *DexEntry) error {
+	if !HaveDex(kegpath) {
+		if err := MakeDex(kegpath); err != nil {
+			return err
+		}
+	}
+	entry.Update(kegpath)
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return err
+	}
+	found := dex.Lookup(entry.N)
+	if found == nil {
+		dex.Add(entry)
+	} else {
+		found.U = entry.U
+		found.T = entry.T
+	}
+	return WriteDex(kegpath, dex)
+}
+
+// Lookup does a linear search through the Dex for one with the passed
+// id and if found returns, otherwise returns nil.
+func (d Dex) Lookup(id int) *DexEntry {
+	for _, i := range d {
+		if i.N == id {
+			return &d[id]
+		}
+	}
+	return nil
+}
+
+// HaveDex returns true if keg at kegpath has a dex/latest.md file.
+func HaveDex(kegpath string) bool {
+	return file.Exists(filepath.Join(kegpath, `dex`, `latest.md`))
+}
+
+// WriteDex writes the dex/latest.md and dex/nodes.tsv files to the keg
+// at kegpath and calls UpdateUpdated to keep keg info file in sync.
+func WriteDex(kegpath string, dex *Dex) error {
+	latest := filepath.Join(kegpath, `dex`, `latest.md`)
+	nodes := filepath.Join(kegpath, `dex`, `nodes.tsv`)
+	if err := file.Overwrite(latest, dex.ByLatest().MD()); err != nil {
+		return err
+	}
+	if err := file.Overwrite(nodes, dex.ByID().TSV()); err != nil {
+		return err
+	}
+	return UpdateUpdated(kegpath)
 }

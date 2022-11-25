@@ -77,3 +77,22 @@ func ExampleMakeDex() {
 	// ignored
 }
 */
+
+/*
+func ExampleMakeNode() {
+	fmt.Println(keg.MakeNode("testdata/samplekeg"))
+
+	// Output:
+	// ignored
+}
+*/
+
+/*
+func ExampleWriteDex() {
+	dex, _ := keg.ReadDex(`testdata/samplekeg`)
+	fmt.Println(keg.WriteDex("testdata/newkeg", dex))
+
+	// Output:
+	// ignored
+}
+*/

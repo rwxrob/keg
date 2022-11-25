@@ -394,6 +394,12 @@ var editCmd = &Z.Cmd{
 		if err := file.Edit(path); err != nil {
 			return err
 		}
+		if file.IsEmpty(path) {
+			if err = os.RemoveAll(filepath.Dir(path)); err != nil {
+				return err
+			}
+		}
+		// FIXME: shouldn't make the entire dex every time
 		if err := MakeDex(keg.Path); err != nil {
 			return err
 		}

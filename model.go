@@ -80,7 +80,7 @@ func (e DexEntry) ID() string { return strconv.Itoa(e.N) }
 // node directory changing, not just the README.md or meta files.
 func (e DexEntry) MD() string {
 	return fmt.Sprintf(
-		"* %v [%v](/%v)",
+		"* %v [%v](../%v)",
 		e.U.Format(IsoDateFmt),
 		e.T, e.N,
 	)
@@ -92,7 +92,7 @@ func (e DexEntry) String() string { return e.MD() }
 // Asinclude returns a KEGML include link list item without the time
 // suitable for creating include blocks in node files.
 func (e DexEntry) AsInclude() string {
-	return fmt.Sprintf("* [%v](/%v)", e.T, e.N)
+	return fmt.Sprintf("* [%v](../%v)", e.T, e.N)
 }
 
 // Dex is a collection of DexEntry structs. This allows mapping methods

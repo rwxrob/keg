@@ -36,7 +36,7 @@ import (
 var NodePaths = _fs.IntDirs
 
 var LatestDexEntryExp = regexp.MustCompile(
-	`^\* (\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ) \[(.*)\]\(/(\d+)\)$`,
+	`^\* (\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\dZ) \[(.*)\]\(\.\./(\d+)\)$`,
 )
 
 // ParseDex parses any input valid for to.String into a Dex pointer.
@@ -121,23 +121,6 @@ func MakeDex(kegdir string) error {
 	return UpdateUpdated(kegdir)
 }
 
-// MkTempNode creates a text node directory containing a README.md
-// file within a directory created with os.MkdirTemp and returns a full
-// path to the README.md file itself. Directory names
-// are always prefixed with keg-node.
-func MkTempNode() (string, error) {
-	dir, err := os.MkdirTemp("", `keg-node-*`)
-	if err != nil {
-		return "", err
-	}
-	readme := path.Join(dir, `README.md`)
-	err = file.Touch(readme)
-	if err != nil {
-		return "", err
-	}
-	return readme, nil
-}
-
 // ImportNode moves the nodedir into the KEG directory for the kegid giving
 // it the nodeid name. Import will fail if the given nodeid already
 // existing the the target KEG.
@@ -207,9 +190,16 @@ func UpdatedString(kegpath string) string {
 // Git commit messages are always based on the latest node title without
 // any verb.
 func Publish(kegpath string) error {
-	if fs.NotExists(filepath.Join(kegpath, `.git`)) {
-		return nil
+	gitd, err := fs.HereOrAbove(`.git`)
+	if err != nil {
+		return err
 	}
+	origd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	defer os.Chdir(origd)
+	os.Chdir(filepath.Dir(gitd))
 	if err := Z.Exec(`git`, `-C`, kegpath, `pull`); err != nil {
 		return err
 	}

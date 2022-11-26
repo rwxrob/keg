@@ -1,0 +1,17 @@
+updated: 2022-11-26 14:34:08Z
+kegv:    2023-01
+
+title:   Personal Knowledge Management with KEG
+url:     guide.keg.pub
+creator: rob.rwx.gg
+state:   living
+
+summary:
+  A quick-start guide to content creation and knowledge management using
+  Knowledge Exchange Graphs with the `keg` command.
+
+indexes:
+  - file: dex/latest.md
+    summary: latest changes
+  - file: dex/nodes.tsv
+    summary: all nodes by id

@@ -173,7 +173,7 @@ func (d Dex) Pretty() string {
 	for _, e := range d {
 		str += fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
-			term.Black, e.U.Format(`2006-01-02 15:03Z`),
+			term.Black, e.U.Format(`2006-01-02 15:04Z`),
 			term.Green, e.N,
 			term.White, e.T,
 			term.Reset,
@@ -190,7 +190,7 @@ func (d Dex) PrettyLines() []string {
 	for _, e := range d {
 		lines = append(lines, fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
-			term.Black, e.U.Format(`2006-01-02 15:03Z`),
+			term.Black, e.U.Format(`2006-01-02 15:04Z`),
 			term.Green, e.N,
 			term.White, e.T,
 			term.Reset,

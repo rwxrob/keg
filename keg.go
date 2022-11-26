@@ -90,7 +90,7 @@ func ScanDex(kegdir string) (*Dex, error) {
 		if err != nil {
 			continue
 		}
-		entry := DexEntry{U: i.ModTime(), T: title, N: id}
+		entry := DexEntry{U: i.ModTime().UTC(), T: title, N: id}
 		dex = append(dex, entry)
 	}
 	return &dex, nil

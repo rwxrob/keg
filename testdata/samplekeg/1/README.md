@@ -27,7 +27,7 @@ This is a sample[^sample] **content node** `README.md` file. It is meant to help
 | Table         | `|`              | All but Lede
 | Paragraph     | None             | All but URL
 
-Take a moment to identify these different block types in this document.
+Take a moment to identify these different block types in this document. A full description and example of each is included below after the summaries of spans and links.
 
 ***Some blocks are limited in their placement in relation to one other and the body as a whole.*** These limitations provide stronger semantic meaning and avoid well-known editing, parsing, and rendering pitfalls.
 
@@ -45,7 +45,7 @@ Take a moment to identify these different block types in this document.
 | Inflect[^i] | `*`       | Alter voice, tone, or mood                |
 | Beacon[^b]  | `**`      | Draw attention, terminology, phrases      |
 | Lede        | `***`     | Introductory, summarize, provoke, entice  |
-| Math        | `$`       | Inline MathJax markup notation            |
+| Math        | `$`       | Inline MathJax/LaTeX markup notation      |
 | Code        | `` ` ``   | Code, monospace, preformatted             |
 | Code        | `` `` ``  | (same as Code, but allows backtick)       |
 | URL         | `<` `>`   | Universal resource locator                |
@@ -54,6 +54,8 @@ Take a moment to identify these different block types in this document.
 Some Spans are limited in where they may appear:
 
 * Lede must be first (and possibly only) span in paragraph block
+
+Take a moment to identify use of each span type within this document. Full descriptions and examples of each span type are included after the description of block types below.
 
 ***There are three types of links: node, file, and foot.*** Node links target another nodes including indexes[^dexnode]. File links target files in the local node directory. Foot links target a footnote in the same `README.md` file containing the foot link.
 
@@ -76,8 +78,6 @@ Some Spans are limited in where they may appear:
 ***Math block begins and ends with two dollar signs ($).***
 
 ***Lede span begins and ends with three stars and must be first span.***
-
-***One list block after another is not allowed.*** Because of the confusion associated with Markdown "long" lists, KEGML does not allow two list blocks to appear in the body next to one another. Separate lists with any other block type to ensure your documents remain valid KEGML.
 
 ***Consider using beacon for terms that first appear.*** A **beacon** is specifically designed to draw attention without change in voice or tone to a span of text primarily for the purpose of introducing new terms and language. By following a simple convention of making the first occurrence of a term in a document into a beacon you can automate linking to a node with that same case-insensitive title. Editors can be customized to add the link automatically, or renderers can create the links when generating content in other forms.
 

@@ -10,38 +10,39 @@ Rather than describe what KEGML is *not* (for those that already know Markdown) 
 
 ***KEGML is Markdown with limitations.*** If you already know any flavor of Markdown[^md] then you already know KEGML. Only the terms and identifiers have changed to provide more semantic meaning.  KEGML limitations are by design to promote good content that is easy to create, read, search, and maintain. KEGML is 100% compatible with all major Markdown versions including CommonMark, GitHub Flavored Markdown, Myst, and Pandoc Markdown. Compatibility means KEGML content can be hosting most anywhere without fear of later compatibility issues.
 
-***A KEGML document is composed of blocks separated by a single blank line.*** Each block has a specific type and syntax and begins with a unique token. (Those developing parsers will be keenly interested in these tokens.) Blocks that allow line returns also have end tokens (that always match the beginning token). All blocks must end with a blank line (effectively two line returns `\n\n`, no carriage returns) or the end of the document. Blocks may contain **spans** and **links** (defined by KEGML) or just raw **runes**[^unicode] (undefined). Some blocks are limited in their placement in relation to one other and the body as a whole. Here is a summary of block types, their token identifiers, what they are allowed to contain, whether or not the block allows line returns within it, and a short description:
+***A KEGML document is composed of blocks separated by a single blank line.*** Each block has a specific type and syntax and begins with a unique token. (Those developing parsers will be keenly interested in these tokens.) Blocks that allow line returns also have end tokens (that always match the beginning token). All blocks must end with a blank line (effectively two line returns `\n\n`, no carriage returns) or the end of the document. Blocks may contain **spans**, **links** (defined by KEGML) or just raw **runes**[^unicode] (undefined). Some blocks are limited in their placement in relation to one other and the body as a whole. Here is a summary of block types, their token identifiers, what they are allowed to contain, and whether or not the block allows line returns within it:
 
-|Block          | Token       |  Lines | Allowed | Description
-|              -|-            |    -   |   -   |
-| Title         | `# `        | No     | Inflect, Math, Code | Must be first line, 72 runes max
-| Bulleted List | `* ` `- ` `+ ` | No  | All but Lede | One line/item, never follows another list
-| Numbered List | `1. `       | No     | All but Lede | One line/item, never follows another list
-| Include List  | `* [`       | No     | Inflect, Math, Code | Node/file target, never follows list
-| Footnotes     | `[^`        | No     | Inflect, Math, Code, URL, Link | Citations, comments, etc.
-| Fenced        | `` ``` `` `~~~`  | Yes | Runes | 3+ backticks or squiggles, syntax class
-| Quote         | `> `        | No     | All but URL, Link, Lede | Single paragraph of quotation
-| Math          | `$$`       | Yes     | Runes | MathJax, LaTeX math notation
-| Figure        | `![`       | No      | Inflect, Math, Code | Meaningful images and graphics
-| Separator     | `----`     | No      | None | Subdivisions, not always "horizontal rule"
-| Table         | `|`        | No      | All but Lede | Compatible with GFM
-| Paragraph     | None       | No      | All but URL | Usually the most common
+|Block          | Token            |  Lines | Allowed                        |
+|              -|-                 |    -   |   -                            |
+| Title         | `# `             | No     | Inflect, Math, Code            |
+| Bulleted List | `* ` `- ` `+ `   | No     | All but Lede                   |
+| Numbered List | `1. `            | No     | All but Lede                   |
+| Include List  | `* [`            | No     | Inflect, Math, Code            |
+| Footnotes     | `[^`             | No     | Inflect, Math, Code, URL, Link |
+| Fenced        | `` ``` `` `~~~`  | Yes    | Runes                          |
+| Quote         | `> `             | No     | All but URL, Link, Lede        |
+| Math          | `$$`             | Yes    | Runes                          |
+| Figure        | `![`             | No     | Inflect, Math, Code            |
+| Separator     | `----`           | No     | None                           |
+| Table         | `|`              | No     | All but Lede                   |
+| Paragraph     | None             | No     | All but URL                    |
 
 ***Spans are composed of an inline run of runes and begin and end with a token.*** All spans begin and end with the same token. Begin tokens must be preceded by a space (or begin block) and must not be followed by a space (ex: ` **foo`). End tokens must be followed by a space (or end block) and not be preceded by space (ex: `foo** `). The special double-backtick Code span (which exists primarily to allow backticks themselves to be included in Code spans) is the only exception and must be surrounded by spaces. Spans must never contain line returns.
 
-|  Span   | Tokens    | Description |
-|    -    |   -       |     -       |
-| Inflect | `*`       | Alter voice, tone, or mood
-| Beacon  | `**`      | Draw attention to a term or phrase without inflection
-| Lede    | `***`     | Introductory text meant to summarize, provoke, and entice
-| Math    | `$`       | Inline MathJax markup notation
-| Code    | `` ` ``   | Code and content other than terms and words, monospace, preformatted
-| Code    | `` `` ``  | (special)
-| URL     | `<` `>`   | Web and other universal resource locators
-| Plain   | (none)    | Anything not in another span type
+|  Span   | Tokens    | Description                               |
+|    -    |   -       |     -                                     |
+| Inflect | `*`       | Alter voice, tone, or mood                |
+| Beacon  | `**`      | Draw attention, terminology, phrases      |
+| Lede    | `***`     | Introductory, summarize, provoke, entice  |
+| Math    | `$`       | Inline MathJax markup notation            |
+| Code    | `` ` ``   | Code, monospace, preformatted             |
+| Code    | `` `` ``  | (same as Code, but allows backtick)       |
+| URL     | `<` `>`   | Universal resource locator                |
+| Plain   | (none)    | Anything not in another span type         |
+
+***There are three types of links: node, file, and foot.*** Node links target another node or index (which is technically an unindexed node). File links target files in the local node directory along with the `README.md` and optional `meta` files. Foot links target a footnote in the same `README.md` file containing the foot link.
 
 ***Links have two parts: link text, and a link target.*** The **link text** begins with a left bracket (`[`) and ends with a right bracket (`]`). The text itself is composed of Inflect, Beacon, Math, Code or Plain spans. The link text is immediately followed by the **link target** which begins with left parenthesis (`(`) and ends with right parenthesis (`)`) and contains either a **node link target** (beginning with `../`) or a **file link target** (matching name of file in local directory). Both link target types may have a **query code** suffix that begins with a question mark (`?`).
-
 
 ***Inflect, Beacon, Lede spans may included Math and Code spans.*** They may now, however, include themselves. This prevents the common stylistic problems but more importantly ensures that these spans maintain their semantic meaning over any possible stylistic formatting.
 

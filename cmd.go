@@ -44,7 +44,8 @@ var Cmd = &Z.Cmd{
 	},
 
 	Shortcuts: Z.ArgMap{
-		`set`: {`var`, `set`},
+		`set`:    {`var`, `set`},
+		`sample`: {`create`, `sample`},
 	},
 
 	ConfVars: true,
@@ -178,7 +179,7 @@ var dirCmd = &Z.Cmd{
 
 var deleteCmd = &Z.Cmd{
 	Name:     `delete`,
-	Summary:  `delete node by ID from current keg`,
+	Summary:  `delete node from current keg`,
 	Aliases:  []string{`del`, `rm`},
 	Usage:    `(help|INTEGER_NODE_ID|last)`,
 	Commands: []*Z.Cmd{help.Cmd},
@@ -265,7 +266,8 @@ var dexUpdateCmd = &Z.Cmd{
 var latestCmd = &Z.Cmd{
 	Name:     `latest`,
 	Aliases:  []string{`last`},
-	Summary:  `show last nodes changed (markdown)`,
+	Usage:    `[help|COUNT|default|set default COUNT]`,
+	Summary:  `show last n nodes changed`,
 	UseVars:  true,
 	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
 	Shortcuts: Z.ArgMap{
@@ -367,7 +369,7 @@ var editCmd = &Z.Cmd{
 	Name:     `edit`,
 	Aliases:  []string{`e`},
 	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
-	Summary:  `choose and edit a specific node`,
+	Summary:  `choose and edit a specific node (default)`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {

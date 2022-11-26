@@ -187,13 +187,13 @@ func UpdatedString(kegpath string) string {
 
 // Publish publishes the keg at kegpath location to its distribution
 // targets listed in the keg file under "publish." Currently, this only
-// involves looking for a .git directory and if found doing a git push.
-// Git commit messages are always based on the latest node title without
-// any verb.
+// involves looking for a .git directory and if found doing a git
+// add/commit/push. Git commit messages are always based on the latest
+// node title without any verb.
 func Publish(kegpath string) error {
 	gitd, err := fs.HereOrAbove(`.git`)
 	if err != nil {
-		return err
+		return nil
 	}
 	origd, err := os.Getwd()
 	if err != nil {

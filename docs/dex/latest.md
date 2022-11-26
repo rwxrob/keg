@@ -1,3 +1,5 @@
-* 2022-11-26 17:27:56Z [KEG books and apps](../3)
+* 2022-11-26 17:31:38Z [KEGML is Markdown with limitations](../4)
+* 2022-11-26 22:28:03Z [Knowledge management](../1)
+* 2022-11-26 22:27:56Z [KEG books and apps](../3)
 * 2022-11-26 22:11:59Z [Content node](../2)
 * 2022-11-26 19:34:08Z [Sorry, planned but not yet available](../0)

@@ -7,11 +7,11 @@ Hello friend. Welcome to the KEG community!
 
 We are obsessed with lightning-fast knowledge management from the terminal and created the `keg` (aka `kn`) command to help. We hope it will be the first fully compliant implementation of the KEG Specification[^spec]. This guide is designed to help you learn to create KEGML[^kegml] content quickly so you can learn the rest by using it.
 
-* [What is knowledge managment any why should you care.](../1?L)
+* [What is knowledge managment any why should you care?](../1?L)
+* [How does `keg` compare to other knowlege management apps?](../3?L)
 * [A KEG content node is the fundamental unit of KEG content written in KEGML.](../2?L)
-* [KEGML is Markdown with limitations.](../3?L)
+* [KEGML is Markdown with limitations.](../4?L)
 
-***KEGML is Markdown with limitations.*** If you already know any flavor of Markdown[^md] then you already know KEGML. Elements have been simplified and given clearer semantic definitions in KEGML and limitations have been added to promote good content that is easy to create, read, search, and maintain. KEGML is 100% compatible with all major Markdown versions including CommonMark, GitHub Flavored Markdown, Myst, Pandoc Markdown, and John Gruber's original. This focus on compatibility means KEGML content can be hosting most anywhere without fear of later compatibility issues or proprietary lock-in.
 
 ***KEGML documents must be encoded in UTF-8 and contain only printable[^printable] runes[^unicode] and line returns (`\n`).*** Tabs are not allowed. Carriage returns are not allowed. Terminal ANSI escapes are not allowed. Line returns are only allowed in Fenced and Math blocks. Emojis are allowed and encouraged.
 

@@ -1,5 +1,7 @@
 # Knowledge management
 
+**Knowledge management** is the process of capturing your thoughts in a way that brings out more thoughts while making them available to review or recall later to gain inspiration or publish and share with others. Knowledge management is more than note taking, but it can certainly be used for it. In fact, one of the most successful knowledge management systems of all time, Luhmann's Zettelkasten, was created in order to capture research and produce publications from it.
+
 Knowledge management goes by many names these days:
 
 * Personal knowledge management (PKM)
@@ -7,7 +9,3 @@ Knowledge management goes by many names these days:
 * Zettelkasten
 * Mind mapping
 * Second brain
-
-The number of books and apps available in this category can be overwhelming. Practically none of them focus on creating content that follows international standards for how that knowledge is structured and exchanged. Most just want to get you to buy them and lock in to their proprietary format.
-
-The one thing these all have in common is getting the thoughts you have captured in a way that brings out more thoughts, and being able to review them later to gain inspiration or simple remember them. 

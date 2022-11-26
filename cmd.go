@@ -29,8 +29,8 @@ func init() {
 var Cmd = &Z.Cmd{
 	Name:      `keg`,
 	Aliases:   []string{`kn`},
-	Summary:   `manage knowledge exchange graphs (KEG)`,
-	Version:   `v0.1.0`,
+	Summary:   `create and manage knowledge exchange graphs`,
+	Version:   `v0.4.1`,
 	Copyright: `Copyright 2022 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
 	Site:      `rwxrob.tv`,
@@ -55,25 +55,39 @@ var Cmd = &Z.Cmd{
 		graph" or "zettelkasten"). Using {{cmd .Name}} you can create,
 		update, search, and organize everything that passes through your
 		brain that you may want to recall later, for whatever reason: school,
-		training, tribal team knowledge, or publishing a paper, article,
-		blog, or book.
-
+		training, team knowledge, or publishing a paper, article, blog, or
+		book.
+		
 		Getting Started
-
+		
 		1. Create a directory and change into it
 		2. Run the {{cmd "init"}} command
 		3. Update the YAML file it opens
 		4. Exit your editor
-
-		Run {{cmd "init"}} inside of a new directory to get started with
-		a new keg. After editing the {{pre "keg"}} file you can create your
-		first node with {{cmd "create"}}.
-
+		5. List contents of directory to see what was created
+		6. Run the {{cmd "create sample"}} command to create your first node
+		7. Read and understand the sample
+		8. Exit your editor
+		9. Check your index with {{cmd "latest"}} or {{cmd "titles"}}
+		10. Repeat 6-9 creating several nodes (optionally omitting {{cmd "sample"}})
+		11. Search titles with the {{cmd "titles"}} command
+		12. Edit node with keywords with {{cmd "edit WORD"}} command
+		13. Notice that {{cmd "edit"}} is the default (ex: {{cmd .Name}} WORD)
+		
+		Learning KEG Markup Language
+		
+		Use the {{cmd "create sample"}} command to automatically create
+		a new content node sample that explains everything about the KEG
+		Markup Language (KEGML). You can delete it later after reading it.
+		Or, you can use it instead of just {{cmd "create"}} (which gives
+		you a blank) to help you remember how to write KEGML until you get
+		proficient enough not to have to look it up every time.
+		
 		For more about the emerging KEG 2023-01 specification and how to
 		create content that complies for knowledge exchange and publication
-		(while we work more on linting and validation within the {{cmd .Name}}
-		command) have a look at https://github.com/rwxrob/keg-spec
-
+		(while we work more on linting and validation within the {{cmd
+		.Name}} command) have a look at https://github.com/rwxrob/keg-spec
+		
 		`,
 }
 
@@ -410,6 +424,7 @@ var editCmd = &Z.Cmd{
 var createCmd = &Z.Cmd{
 	Name:     `create`,
 	Aliases:  []string{`c`},
+	Params:   []string{`sample`},
 	Summary:  `create and edit content node`,
 	MaxArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
@@ -421,6 +436,11 @@ var createCmd = &Z.Cmd{
 		entry, err := MakeNode(keg.Path)
 		if err != nil {
 			return err
+		}
+		if len(args) > 0 && args[0] == `sample` {
+			if err := WriteSample(keg.Path, entry); err != nil {
+				return err
+			}
 		}
 		if err := Edit(keg.Path, entry.N); err != nil {
 			return err

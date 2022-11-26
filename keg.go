@@ -2,6 +2,7 @@ package keg
 
 import (
 	"bufio"
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -301,4 +302,16 @@ func WriteDex(kegpath string, dex *Dex) error {
 		return err
 	}
 	return UpdateUpdated(kegpath)
+}
+
+//go:embed testdata/samplekeg/1/README.md
+var SampleNodeReadme string
+
+// WriteSample writes the embedded SampleNodeReadme to the entry
+// indicated in the keg specified by kegpath.
+func WriteSample(kegpath string, entry *DexEntry) error {
+	return file.Overwrite(
+		filepath.Join(kegpath, entry.ID(), `README.md`),
+		SampleNodeReadme,
+	)
 }

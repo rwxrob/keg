@@ -7,6 +7,7 @@ Hello friend. Welcome to the KEG community!
 
 We are obsessed with lightning-fast knowledge management from the terminal and created the `keg` (aka `kn`) command to help. We hope it will be the first fully compliant implementation of the KEG Specification[^spec]. This guide is designed to help you learn to create KEGML[^kegml] content quickly so you can learn the rest by using it.
 
+* [What is knowledge managment any why should you care.](../1?L)
 * [A KEG content node is the fundamental unit of KEG content written in KEGML.](../2?L)
 * [KEGML is Markdown with limitations.](../3?L)
 

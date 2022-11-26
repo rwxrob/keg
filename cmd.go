@@ -330,12 +330,12 @@ var initCmd = &Z.Cmd{
 
 	Description: `
 		The {{aka}} command creates a {{pre "keg"}} YAML file in the
-		current working directory and opens it up for editing. 
+		current working directory and opens it up for editing.
 
 		{{aka}} also creates a **zero node** (/0) typically used for
-		linking to planned content from other content nodes. 
+		linking to planned content from other content nodes.
 
-		Finally, {{aka}} creates the {{pre "dex/latest.md"}} and 
+		Finally, {{aka}} creates the {{pre "dex/latest.md"}} and
 		{{pre "dex/nodex.tsv"}} index files and updates the {{pre "keg"}} file
 		update field to match the latest update (effectively the same as calling
 		{{cmd "dex update"}}).
@@ -348,8 +348,10 @@ var initCmd = &Z.Cmd{
 				return err
 			}
 		}
-		if err := file.Overwrite(`0/README.md`, DefaultZeroNode); err != nil {
-			return err
+		if fs.NotExists(`0/README.md`) {
+			if err := file.Overwrite(`0/README.md`, DefaultZeroNode); err != nil {
+				return err
+			}
 		}
 		if err := file.Edit(`keg`); err != nil {
 			return err

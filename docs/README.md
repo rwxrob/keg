@@ -5,13 +5,17 @@ your own knowledge exchange graph with the `keg`[^kn] command.***
 
 Hello friend. Welcome to the KEG community!
 
-We are obsessed with lightning-fast knowledge management from the terminal and created the `keg` (aka `kn`) command to help. We hope it will be the first fully compliant implementation of the KEG Specification[^spec]. This guide is designed to help you learn to create KEGML[^kegml] content quickly so you can learn the rest by using it.
+We are obsessed with lightning-fast knowledge management and created the `keg` (aka `kn`) command to help. We hope you have as much fun with it as we do. There's something very addicting about taking control of one's own knowledge management in this searchable, gamified way.
 
-* [What is knowledge managment any why should you care?](../1?L)
-* [How does `keg` compare to other knowlege management apps?](../3?L)
+We hope it will be the first fully compliant implementation of the KEG Specification[^spec]. This guide is designed to help you learn to create KEGML[^kegml] content quickly so you can learn the rest by using it.
+
+* [Let's start a keg](../5)
+* [What is knowledge managment?](../1)
+* [What about other knowlege management apps?](../3)
+* [KEG Markup Language]
+
 * [A KEG content node is the fundamental unit of KEG content written in KEGML.](../2?L)
 * [KEGML is Markdown with limitations.](../4?L)
-
 
 ***KEGML documents must be encoded in UTF-8 and contain only printable[^printable] runes[^unicode] and line returns (`\n`).*** Tabs are not allowed. Carriage returns are not allowed. Terminal ANSI escapes are not allowed. Line returns are only allowed in Fenced and Math blocks. Emojis are allowed and encouraged.
 

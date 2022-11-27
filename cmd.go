@@ -40,7 +40,7 @@ var Cmd = &Z.Cmd{
 	Commands: []*Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
-		latestCmd, titleCmd, initCmd, randomCmd,
+		lastCmd, changesCmd, titleCmd, initCmd, randomCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -69,7 +69,7 @@ var Cmd = &Z.Cmd{
 		6. Run the {{cmd "create sample"}} command to create your first node
 		7. Read and understand the sample
 		8. Exit your editor
-		9. Check your index with {{cmd "latest"}} or {{cmd "titles"}}
+		9. Check your index with {{cmd "changes"}} or {{cmd "titles"}}
 		10. Repeat 6-9 creating several nodes (optionally omitting {{cmd "sample"}})
 		11. Search titles with the {{cmd "titles"}} command
 		12. Edit node with keywords with {{cmd "edit WORD"}} command
@@ -181,7 +181,7 @@ var deleteCmd = &Z.Cmd{
 	Name:     `delete`,
 	Summary:  `delete node from current keg`,
 	Aliases:  []string{`del`, `rm`},
-	Usage:    `(help|INTEGER_NODE_ID|last)`,
+	Usage:    `(help|INTEGER_NODE_ID|last|same)`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -190,6 +190,11 @@ var deleteCmd = &Z.Cmd{
 			return err
 		}
 		id := args[0]
+		if id == "same" {
+			if n := LastChanged(keg.Path); n != nil {
+				id = n.ID()
+			}
+		}
 		if id == "last" {
 			if n := Last(keg.Path); n != nil {
 				id = n.ID()
@@ -253,7 +258,7 @@ var dexCmd = &Z.Cmd{
 var dexUpdateCmd = &Z.Cmd{
 	Name:     `update`,
 	Commands: []*Z.Cmd{help.Cmd},
-	Summary:  `update dex/latest.md and dex/nodes.tsv`,
+	Summary:  `update dex/changes.md and dex/nodes.tsv`,
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller.Caller) // keg dex update
 		if err != nil {
@@ -263,11 +268,63 @@ var dexUpdateCmd = &Z.Cmd{
 	},
 }
 
-var latestCmd = &Z.Cmd{
-	Name:     `latest`,
-	Aliases:  []string{`last`},
+var lastCmd = &Z.Cmd{
+	Name:     `last`,
+	Usage:    `[help|dir|id|title|time]`,
+	Params:   []string{`dir`, `id`, `title`, `time`},
+	MaxArgs:  1,
+	Summary:  `show last created node`,
+	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{aka}} command shows information about the last content node
+		that was created, which is assumed to be the one with the highest
+		integer identifier within the current keg directory. By default the
+		colorized form is displayed to interactive terminals and a KEGML
+		include link when non-interactive (assuming !! from vim, for example).
+
+		* {{pre "dir"}} shows only the full directory path
+		* {{pre "id"}} shows only the node ID
+		* {{pre "title"}} shows only the title
+		* {{pre "time"}} shows only the time of last change
+
+		Note that this is different than the latest {{cmd "changes"}} command.
+
+	`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
+		}
+		last := Last(keg.Path)
+		if len(args) == 0 {
+			if term.IsInteractive() {
+				fmt.Print(last.Pretty())
+			} else {
+				fmt.Print(last.MD())
+			}
+			return nil
+		}
+		switch args[0] {
+		case `dir`:
+			term.Print(filepath.Join(keg.Path, last.ID()))
+		case `time`:
+			term.Print(last.U.Format(IsoDateFmt))
+		case `title`:
+			term.Print(last.T)
+		case `id`:
+			term.Print(last.ID())
+		}
+		return nil
+	},
+}
+
+var changesCmd = &Z.Cmd{
+	Name:     `changes`,
+	Aliases:  []string{`changed`},
 	Usage:    `[help|COUNT|default|set default COUNT]`,
-	Summary:  `show last n nodes changed`,
+	Summary:  `show most recent n nodes changed`,
 	UseVars:  true,
 	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
 	Shortcuts: Z.ArgMap{
@@ -295,9 +352,9 @@ var latestCmd = &Z.Cmd{
 		if err != nil {
 			return err
 		}
-		path := filepath.Join(keg.Path, `dex/latest.md`)
+		path := filepath.Join(keg.Path, `dex/changes.md`)
 		if !fs.Exists(path) {
-			return fmt.Errorf("dex/latest.md file does not exist")
+			return fmt.Errorf("dex/changes.md file does not exist")
 		}
 		lines, err := file.Head(path, n)
 		if err != nil {
@@ -335,7 +392,7 @@ var initCmd = &Z.Cmd{
 		{{aka}} also creates a **zero node** (/0) typically used for
 		linking to planned content from other content nodes.
 
-		Finally, {{aka}} creates the {{pre "dex/latest.md"}} and
+		Finally, {{aka}} creates the {{pre "dex/changes.md"}} and
 		{{pre "dex/nodex.tsv"}} index files and updates the {{pre "keg"}} file
 		update field to match the latest update (effectively the same as calling
 		{{cmd "dex update"}}).
@@ -370,9 +427,23 @@ var initCmd = &Z.Cmd{
 var editCmd = &Z.Cmd{
 	Name:     `edit`,
 	Aliases:  []string{`e`},
-	Usage:    `(help|INTEGER_NODE_ID|last|TITLEWORD)`,
+	Params:   []string{`last`, `same`},
+	Usage:    `(help|ID|last|same|TITLEWORD)`,
 	Summary:  `choose and edit a specific node (default)`,
 	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{aka}} command opens a content node README.md file for editing.
+		It is the default command when no other arguments match other
+		commands. Nodes can be identified by integer ID, TITLEWORD contained
+		in the title, or the special {{pre "last"}} (last created) or {{pre
+		"same"}} (last updated) parameters.
+
+		For TITLEWORD if more than one match is found the user is prompted
+		to choose between them. Otherwise, the match is opened in the
+		EDITOR. See rwxrob/fs.file.Edit for more about how editor is resolved.
+
+	`,
 
 	Call: func(x *Z.Cmd, args ...string) error {
 		if len(args) == 0 {
@@ -386,11 +457,16 @@ var editCmd = &Z.Cmd{
 			return err
 		}
 		id := args[0]
-		if id == "last" {
+		switch id {
+		case "same":
+			if n := LastChanged(keg.Path); n != nil {
+				id = n.ID()
+			}
+		case "last":
 			if n := Last(keg.Path); n != nil {
 				id = n.ID()
 			}
-		} else {
+		default:
 			_, err := strconv.Atoi(id)
 			if err != nil {
 				dex, err := ReadDex(keg.Path)

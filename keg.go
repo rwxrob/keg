@@ -48,7 +48,7 @@ func ParseDex(in any) (*Dex, error) {
 	for line := 1; s.Scan(); line++ {
 		f := LatestDexEntryExp.FindStringSubmatch(s.Text())
 		if len(f) != 4 {
-			return nil, fmt.Errorf("bad line in latest.md: %v", line)
+			return nil, fmt.Errorf("bad line in changes.md: %v", line)
 		}
 		if t, err := time.Parse(IsoDateFmt, string(f[1])); err != nil {
 			return nil, err
@@ -63,9 +63,9 @@ func ParseDex(in any) (*Dex, error) {
 	return &dex, nil
 }
 
-// ReadDex reads an existing dex/latest.md dex and returns it.
+// ReadDex reads an existing dex/changes.md dex and returns it.
 func ReadDex(kegdir string) (*Dex, error) {
-	f := filepath.Join(kegdir, `dex`, `latest.md`)
+	f := filepath.Join(kegdir, `dex`, `changes.md`)
 	buf, err := os.ReadFile(f)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func ScanDex(kegdir string) (*Dex, error) {
 // reserved dex node file within the kegdir passed. File-level
 // locking is attempted using the go-internal/lockedfile (used by Go
 // itself). Both a friendly markdown file reverse sorted by time of last
-// update (latest.md) and a tab-delimited file sorted numerically by
+// update (changes.md) and a tab-delimited file sorted numerically by
 // node ID (nodes.tsv) are created.
 func MakeDex(kegdir string) error {
 	dex, err := ScanDex(kegdir)
@@ -109,7 +109,7 @@ func MakeDex(kegdir string) error {
 	}
 
 	// markdown is first since reverse chrono of updates is default
-	mdpath := filepath.Join(kegdir, `dex`, `latest.md`)
+	mdpath := filepath.Join(kegdir, `dex`, `changes.md`)
 	if err := file.Overwrite(mdpath, dex.MD()); err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func UpdateUpdated(kegpath string) error {
 // (the first line) and returns the time stamp it contains as
 // a time.Time. If a time stamp could not be determined returns time.
 func Updated(kegpath string) (*time.Time, error) {
-	kegfile := filepath.Join(kegpath, `dex`, `latest.md`)
+	kegfile := filepath.Join(kegpath, `dex`, `changes.md`)
 	str, err := file.FindString(kegfile, IsoDateExpStr)
 	if err != nil {
 		return nil, err
@@ -158,11 +158,11 @@ func Updated(kegpath string) (*time.Time, error) {
 	return &t, nil
 }
 
-// Last parses and returns a DexEntry of the most recently
-// updated node from first line of the dex/latest.md file. If cannot
+// LastChanged parses and returns a DexEntry of the most recently
+// updated node from first line of the dex/changes.md file. If cannot
 // determine returns nil.
-func Last(kegpath string) *DexEntry {
-	kegfile := filepath.Join(kegpath, `dex`, `latest.md`)
+func LastChanged(kegpath string) *DexEntry {
+	kegfile := filepath.Join(kegpath, `dex`, `changes.md`)
 	lines, err := file.Head(kegfile, 1)
 	if err != nil || len(lines) == 0 {
 		return nil
@@ -172,6 +172,16 @@ func Last(kegpath string) *DexEntry {
 		return nil
 	}
 	return &(*dex)[0]
+}
+
+// Last returns the last created content node. If cannot determine
+// returns nil
+func Last(kegpath string) *DexEntry {
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return nil
+	}
+	return dex.Last()
 }
 
 // UpdatedString returns Updated time as a string or an empty string if
@@ -248,11 +258,11 @@ func Edit(kegpath string, id int) error {
 }
 
 // DexUpdate first checks the keg at kegpath for an existing
-// dex/latest.md file and if found loads it, if not, MakeDex is called
+// dex/changes.md file and if found loads it, if not, MakeDex is called
 // to create it. Then DexUpdate examines the Dex for the DexEntry passed
 // and if found updates it with the new information, otherwise, it will
 // add the new entry without any further validation. The updated Dex is
-// then written to the dex/latest.md file.
+// then written to the dex/changes.md file.
 func DexUpdate(kegpath string, entry *DexEntry) error {
 	if !HaveDex(kegpath) {
 		if err := MakeDex(kegpath); err != nil {
@@ -274,28 +284,17 @@ func DexUpdate(kegpath string, entry *DexEntry) error {
 	return WriteDex(kegpath, dex)
 }
 
-// Lookup does a linear search through the Dex for one with the passed
-// id and if found returns, otherwise returns nil.
-func (d Dex) Lookup(id int) *DexEntry {
-	for _, i := range d {
-		if i.N == id {
-			return &d[id]
-		}
-	}
-	return nil
-}
-
-// HaveDex returns true if keg at kegpath has a dex/latest.md file.
+// HaveDex returns true if keg at kegpath has a dex/changes.md file.
 func HaveDex(kegpath string) bool {
-	return file.Exists(filepath.Join(kegpath, `dex`, `latest.md`))
+	return file.Exists(filepath.Join(kegpath, `dex`, `changes.md`))
 }
 
-// WriteDex writes the dex/latest.md and dex/nodes.tsv files to the keg
+// WriteDex writes the dex/changes.md and dex/nodes.tsv files to the keg
 // at kegpath and calls UpdateUpdated to keep keg info file in sync.
 func WriteDex(kegpath string, dex *Dex) error {
-	latest := filepath.Join(kegpath, `dex`, `latest.md`)
+	changes := filepath.Join(kegpath, `dex`, `changes.md`)
 	nodes := filepath.Join(kegpath, `dex`, `nodes.tsv`)
-	if err := file.Overwrite(latest, dex.ByLatest().MD()); err != nil {
+	if err := file.Overwrite(changes, dex.ByChanges().MD()); err != nil {
 		return err
 	}
 	if err := file.Overwrite(nodes, dex.ByID().TSV()); err != nil {

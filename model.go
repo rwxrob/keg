@@ -26,7 +26,7 @@ type Local struct {
 	Path string
 }
 
-// DexEntry represents a single line in an index (usually the latest.md
+// DexEntry represents a single line in an index (usually the changes.md
 // or nodes.tsv file). All three fields are always required.
 type DexEntry struct {
 	U time.Time // updated
@@ -95,6 +95,20 @@ func (e DexEntry) AsInclude() string {
 	return fmt.Sprintf("* [%v](../%v)", e.T, e.N)
 }
 
+// Pretty returns a string with pretty colors.
+func (e DexEntry) Pretty() string {
+	nwidth := len(e.ID())
+	return fmt.Sprintf(
+		"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
+		term.Black, e.U.Format(`2006-01-02 15:04Z`),
+		term.Green, e.N,
+		term.White, e.T,
+		term.Reset,
+	)
+}
+
+// -------------------------------- Dex -------------------------------
+
 // Dex is a collection of DexEntry structs. This allows mapping methods
 // for its serialization to different output formats.
 type Dex []DexEntry
@@ -114,12 +128,23 @@ func (d *Dex) MarshalJSON() ([]byte, error) {
 	return byt, nil
 }
 
+// Lookup does a linear search through the Dex for one with the passed
+// id and if found returns, otherwise returns nil.
+func (d Dex) Lookup(id int) *DexEntry {
+	for _, i := range d {
+		if i.N == id {
+			return &d[id]
+		}
+	}
+	return nil
+}
+
 // String fulfills the fmt.Stringer interface as JSON. Any error returns
 // a "null" string.
 func (e Dex) String() string { return e.TSV() }
 
 // MD renders the entire Dex as a Markdown list suitable for the
-// standard dex/latest.md file.
+// standard dex/changes.md file.
 func (e Dex) MD() string {
 	var str string
 	for _, entry := range e {
@@ -148,28 +173,45 @@ func (e Dex) TSV() string {
 	return str
 }
 
-// Highest returns the highest integer value identifier.
-func (d Dex) Highest() int {
-	var highest int
+// Last returns the DexEntry with the highest integer value identifier.
+func (d Dex) Last() *DexEntry {
+	var last DexEntry
 	for _, e := range d {
-		if e.N > highest {
-			highest = e.N
+		if e.N > last.N {
+			last = e
 		}
 	}
-	return highest
+	return &last
 }
 
-// Highest returns Highest as string.
-func (d Dex) HighestString() string { return strconv.Itoa(d.Highest()) }
+// LastChanged returns the highest integer value identifier.
+func (d Dex) LastChanged() *DexEntry {
+	var last DexEntry
+	for _, e := range d {
+		if e.U.After(last.U) {
+			last = e
+		}
+	}
+	return &last
+}
 
-// HighestWidth returns width of highest integer identifier.
-func (d Dex) HighestWidth() int { return len(d.HighestString()) }
+// LastIdString returns Last as string.
+func (d Dex) LastIdString() string { return strconv.Itoa(d.Last().N) }
+
+// LastIdWidth returns width of Last integer identifier.
+func (d Dex) LastIdWidth() int { return len(d.LastIdString()) }
+
+// LastChangedIdString returns Last as string.
+func (d Dex) LastChangedIdString() string { return strconv.Itoa(d.LastChanged().N) }
+
+// LastChangedIdWidth returns width of Last integer identifier.
+func (d Dex) LastChangedIdWidth() int { return len(d.LastChangedIdString()) }
 
 // Pretty returns a string with pretty color string with time stamps
 // rendered in more readable way.
 func (d Dex) Pretty() string {
 	var str string
-	nwidth := d.HighestWidth()
+	nwidth := d.LastIdWidth()
 	for _, e := range d {
 		str += fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
@@ -186,7 +228,7 @@ func (d Dex) Pretty() string {
 // return.
 func (d Dex) PrettyLines() []string {
 	lines := make([]string, 0, len(d))
-	nwidth := d.HighestWidth()
+	nwidth := d.LastIdWidth()
 	for _, e := range d {
 		lines = append(lines, fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
@@ -208,9 +250,9 @@ func (d Dex) ByID() Dex {
 	return d
 }
 
-// ByLatest sorts the Dex from most recent update to oldest. A pointer
+// ByChanges sorts the Dex from most recently changed to oldest. A pointer
 // to self is returned for convenience.
-func (d Dex) ByLatest() Dex {
+func (d Dex) ByChanges() Dex {
 	sort.Slice(d, func(i, j int) bool {
 		return d[i].U.After(d[j].U)
 	})

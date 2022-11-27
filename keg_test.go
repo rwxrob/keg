@@ -28,7 +28,7 @@ func ExampleNodePaths() {
 func ExampleUpdatedString() {
 	fmt.Println(keg.UpdatedString(`testdata/samplekeg`))
 	// Output:
-	// 2022-11-17 18:34:10Z
+	// 2022-11-26 19:33:24Z
 }
 
 /*

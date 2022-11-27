@@ -103,6 +103,7 @@ var currentCmd = &Z.Cmd{
 
 		1. The {{pre "KEG_CURRENT"}} environment variable
 		2. The current working directory if {{pre "keg"}} file found
+		2. The {{pre "docs"}} directory in current working if found
 		3. The {{pre "current"}} var setting (see {{cmd "var"}})
 
 		Note that setting the var forces {{cmd .Name}} to always use that
@@ -116,11 +117,14 @@ var currentCmd = &Z.Cmd{
 	`,
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		term.Print(keg.Name)
+
 		return nil
 	},
 }
@@ -132,24 +136,29 @@ var titleCmd = &Z.Cmd{
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		if len(args) == 0 {
 			args = append(args, "")
 		}
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
-		str := strings.Join(args, " ")
+
 		var dex *Dex
+		str := strings.Join(args, " ")
 		dex, err = ReadDex(keg.Path)
 		if err != nil {
 			return err
 		}
+
 		if term.IsInteractive() {
 			Z.Page(dex.WithTitleText(str).Pretty())
-		} else {
-			fmt.Print(dex.WithTitleText(str).AsIncludes())
+			return nil
 		}
+
+		fmt.Print(dex.WithTitleText(str).AsIncludes())
 		return nil
 	},
 }
@@ -162,17 +171,21 @@ var dirCmd = &Z.Cmd{
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		if len(args) > 0 {
 			dex, _ := ReadDex(keg.Path)
 			choice := dex.ChooseWithTitleText(strings.Join(args, " "))
 			term.Print(filepath.Join(keg.Path, strconv.Itoa(choice.N)))
-		} else {
-			term.Print(keg.Path)
+			return nil
 		}
+
+		term.Print(keg.Path)
+
 		return nil
 	},
 }
@@ -180,73 +193,48 @@ var dirCmd = &Z.Cmd{
 var deleteCmd = &Z.Cmd{
 	Name:     `delete`,
 	Summary:  `delete node from current keg`,
+	MinArgs:  1,
 	Aliases:  []string{`del`, `rm`},
 	Usage:    `(help|INTEGER_NODE_ID|last|same)`,
 	Commands: []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		id := args[0]
 		if id == "same" {
 			if n := LastChanged(keg.Path); n != nil {
 				id = n.ID()
 			}
 		}
+
 		if id == "last" {
 			if n := Last(keg.Path); n != nil {
 				id = n.ID()
 			}
 		}
-		_, err = strconv.Atoi(id)
-		if err != nil {
+
+		if _, err = strconv.Atoi(id); err != nil {
 			return x.UsageError()
 		}
+
 		dir := filepath.Join(keg.Path, id)
 		log.Println("deleting", dir)
-		err = os.RemoveAll(dir)
-		if err != nil {
+
+		if err := os.RemoveAll(dir); err != nil {
 			return err
 		}
-		err = MakeDex(keg.Path)
-		if err != nil {
+
+		if err := MakeDex(keg.Path); err != nil {
 			return err
 		}
+
 		return Publish(keg.Path)
 	},
-}
-
-func current(x *Z.Cmd) (*Local, error) {
-	var name, dir string
-
-	// if we have an env it beats config settings
-	name = os.Getenv(`KEG_CURRENT`)
-	dir, _ = x.C(`map.` + name)
-	if !(dir == "" || dir == "null") {
-		dir = fs.Tilde2Home(dir)
-		return &Local{Path: dir, Name: name}, nil
-	}
-
-	// check if current working directory has a keg
-	dir, _ = os.Getwd()
-	if fs.Exists(filepath.Join(dir, `keg`)) {
-		name = filepath.Base(dir)
-		return &Local{Path: dir, Name: name}, nil
-	}
-
-	// check vars and conf
-	name, _ = x.Get(`current`)
-	if name != "" {
-		dir, _ = x.C(`map.` + name)
-		if !(dir == "" || dir == "null") {
-			dir = fs.Tilde2Home(dir)
-			return &Local{Path: dir, Name: name}, nil
-		}
-	}
-
-	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
 var dexCmd = &Z.Cmd{
@@ -260,10 +248,12 @@ var dexUpdateCmd = &Z.Cmd{
 	Commands: []*Z.Cmd{help.Cmd},
 	Summary:  `update dex/changes.md and dex/nodes.tsv`,
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller.Caller) // keg dex update
 		if err != nil {
 			return err
 		}
+
 		return MakeDex(keg.Path)
 	},
 }
@@ -293,11 +283,14 @@ var lastCmd = &Z.Cmd{
 	`,
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		last := Last(keg.Path)
+
 		if len(args) == 0 {
 			if term.IsInteractive() {
 				fmt.Print(last.Pretty())
@@ -306,6 +299,7 @@ var lastCmd = &Z.Cmd{
 			}
 			return nil
 		}
+
 		switch args[0] {
 		case `dir`:
 			term.Print(filepath.Join(keg.Path, last.ID()))
@@ -316,6 +310,7 @@ var lastCmd = &Z.Cmd{
 		case `id`:
 			term.Print(last.ID())
 		}
+
 		return nil
 	},
 }
@@ -327,18 +322,22 @@ var changesCmd = &Z.Cmd{
 	Summary:  `show most recent n nodes changed`,
 	UseVars:  true,
 	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
+
 	Shortcuts: Z.ArgMap{
 		`default`: {`var`, `get`, `default`},
 		`set`:     {`var`, `set`},
 	},
+
 	Call: func(x *Z.Cmd, args ...string) error {
 		var err error
 		n := 1
+
 		if len(args) > 0 {
 			n, err = strconv.Atoi(args[0])
 			if err != nil {
 				return err
 			}
+
 		} else {
 			def, err := x.Get(`default`)
 			if err == nil && def != "" {
@@ -348,27 +347,33 @@ var changesCmd = &Z.Cmd{
 				}
 			}
 		}
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		path := filepath.Join(keg.Path, `dex/changes.md`)
 		if !fs.Exists(path) {
 			return fmt.Errorf("dex/changes.md file does not exist")
 		}
+
 		lines, err := file.Head(path, n)
 		if err != nil {
 			return err
 		}
+
 		dex, err := ParseDex(strings.Join(lines, "\n"))
 		if err != nil {
 			return nil
 		}
+
 		if term.IsInteractive() {
 			fmt.Print(dex.Pretty())
-		} else {
-			fmt.Print(dex.AsIncludes())
+			return nil
 		}
+
+		fmt.Print(dex.AsIncludes())
 		return nil
 	},
 }
@@ -400,19 +405,23 @@ var initCmd = &Z.Cmd{
 	`,
 
 	Call: func(_ *Z.Cmd, _ ...string) error {
+
 		if fs.NotExists(`keg`) {
 			if err := file.Overwrite(`keg`, DefaultInfoFile); err != nil {
 				return err
 			}
 		}
+
 		if fs.NotExists(`0/README.md`) {
 			if err := file.Overwrite(`0/README.md`, DefaultZeroNode); err != nil {
 				return err
 			}
 		}
+
 		if err := file.Edit(`keg`); err != nil {
 			return err
 		}
+
 		dir, err := os.Getwd()
 		if err != nil {
 			return err
@@ -420,6 +429,7 @@ var initCmd = &Z.Cmd{
 		if err := MakeDex(dir); err != nil {
 			return err
 		}
+
 		return Publish(dir)
 	},
 }
@@ -446,57 +456,75 @@ var editCmd = &Z.Cmd{
 	`,
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		if len(args) == 0 {
 			return help.Cmd.Call(x, args...)
 		}
+
 		if !term.IsInteractive() {
 			return titleCmd.Call(x, args...)
 		}
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		id := args[0]
+
 		switch id {
+
 		case "same":
 			if n := LastChanged(keg.Path); n != nil {
 				id = n.ID()
 			}
+
 		case "last":
 			if n := Last(keg.Path); n != nil {
 				id = n.ID()
 			}
+
 		default:
 			_, err := strconv.Atoi(id)
+
 			if err != nil {
+
 				dex, err := ReadDex(keg.Path)
 				if err != nil {
 					return err
 				}
+
 				key := strings.Join(args, " ")
 				choice := dex.ChooseWithTitleText(key)
 				if choice == nil {
 					return fmt.Errorf("unable to choose a title")
 				}
+
 				id = strconv.Itoa(choice.N)
 			}
 		}
+
 		path := filepath.Join(keg.Path, id, `README.md`)
+
 		if !fs.Exists(path) {
 			return fmt.Errorf("content node (%s) does not exist in %q", id, keg.Name)
 		}
+
 		if err := file.Edit(path); err != nil {
 			return err
 		}
+
 		if file.IsEmpty(path) {
 			if err = os.RemoveAll(filepath.Dir(path)); err != nil {
 				return err
 			}
 		}
+
 		// FIXME: shouldn't make the entire dex every time
 		if err := MakeDex(keg.Path); err != nil {
 			return err
 		}
+
 		return Publish(keg.Path)
 	},
 }
@@ -508,26 +536,33 @@ var createCmd = &Z.Cmd{
 	Summary:  `create and edit content node`,
 	MaxArgs:  1,
 	Commands: []*Z.Cmd{help.Cmd},
+
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		entry, err := MakeNode(keg.Path)
 		if err != nil {
 			return err
 		}
+
 		if len(args) > 0 && args[0] == `sample` {
 			if err := WriteSample(keg.Path, entry); err != nil {
 				return err
 			}
 		}
+
 		if err := Edit(keg.Path, entry.N); err != nil {
 			return err
 		}
+
 		if err := DexUpdate(keg.Path, entry); err != nil {
 			return err
 		}
+
 		return Publish(keg.Path)
 	},
 }
@@ -631,4 +666,47 @@ var randomCmd = &Z.Cmd{
 		}
 		return nil
 	},
+}
+
+// has to stay here because needs vars package from x
+func current(x *Z.Cmd) (*Local, error) {
+	var name, dir string
+
+	// if we have an env it beats config settings
+	name = os.Getenv(`KEG_CURRENT`)
+	dir, _ = x.C(`map.` + name)
+	if !(dir == "" || dir == "null") {
+		dir = fs.Tilde2Home(dir)
+		return &Local{Path: dir, Name: name}, nil
+	}
+
+	// check if current working directory has a keg
+	dir, _ = os.Getwd()
+	if fs.Exists(filepath.Join(dir, `keg`)) {
+		name = filepath.Base(dir)
+		if name == `docs` {
+			name = filepath.Base(filepath.Dir(dir))
+		}
+		return &Local{Path: dir, Name: name}, nil
+	}
+
+	// check if current working directory has a docs/keg
+	dir, _ = os.Getwd()
+	if fs.Exists(filepath.Join(dir, `docs`, `keg`)) {
+		name = filepath.Base(dir)
+		dir = filepath.Join(dir, `docs`)
+		return &Local{Path: dir, Name: name}, nil
+	}
+
+	// check vars and conf
+	name, _ = x.Get(`current`)
+	if name != "" {
+		dir, _ = x.C(`map.` + name)
+		if !(dir == "" || dir == "null") {
+			dir = fs.Tilde2Home(dir)
+			return &Local{Path: dir, Name: name}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }

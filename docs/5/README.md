@@ -17,3 +17,4 @@ Before going over anything else, why not just make a keg and get a feel for it.
 1. Create another node with `keg create` this time
 1. Pick a keyword that is unique from title and `keg WORD` to find it
 1. Try `keg latest` to see the latest list
+

@@ -1,19 +1,12 @@
-# KEG Quick Start Guide
+# Sample content node
 
-***Take control of your personal knowledge management quickly by starting
-your own knowledge exchange graph with the `keg`[^kn] command.***
+Hello KEG friend!
 
-Hello friend. Welcome to the KEG community!
+This is a sample[^sample] **content node** `README.md` file. It is meant to help you learn to create KEGML[^kegml] content quickly by example. To create a new sample use `keg create sample` or `keg sample`. To delete  entirely use `keg delete ID` or `keg edit ID` and just empty the file before saving. The `edit` command automatically deletes any node with an empty `README.md` file.
 
-We are obsessed with lightning-fast knowledge management and created the `keg` (aka `kn`) command to help. We hope you have as much fun with it as we do. There's something very addicting about taking control of one's own knowledge management in this searchable, gamified way.
+***A KEG content node is the fundamental unit of KEG content written in KEGML.*** This `README.md` file is part of a **content node** (or just "node"). A node is a directory inside a **keg directory** with an integer name[^nodeid] that contains (1) a `README.md` file; (2) an optional `meta` YAML file with structured data; and (3) one or more optional content files (including images). Most nodes will contain links and includes pointing to other nodes and files. This creates a **knowledge graph** structure that can be rendered as a document, static Web site, outline, or mind map. The knowledge graph design is inspired by the *original* WorldWideWeb and Luhmann's very successful Zettelkasten method[^luhmann].
 
-* [Let's start a keg](../5)
-* [What is knowledge managment?](../1)
-* [What about other knowledge management apps?](../3)
-* [KEG Markup Language]
-
-* [A KEG content node is the fundamental unit of KEG content written in KEGML.](../2?L)
-* [KEGML is Markdown with limitations.](../4?L)
+***KEGML is Markdown with limitations.*** If you already know any flavor of Markdown[^md] then you already know KEGML. Elements have been simplified and given clearer semantic definitions in KEGML and limitations have been added to promote good content that is easy to create, read, search, and maintain. KEGML is 100% compatible with all major Markdown versions including CommonMark, GitHub Flavored Markdown, Myst, Pandoc Markdown, and John Gruber's original. This focus on compatibility means KEGML content can be hosting most anywhere without fear of later compatibility issues or proprietary lock-in.
 
 ***KEGML documents must be encoded in UTF-8 and contain only printable[^printable] runes[^unicode] and line returns (`\n`).*** Tabs are not allowed. Carriage returns are not allowed. Terminal ANSI escapes are not allowed. Line returns are only allowed in Fenced and Math blocks. Emojis are allowed and encouraged.
 
@@ -101,4 +94,3 @@ Take a moment to identify use of each span type within this document. Full descr
 [^b]: Reuse of the "b" from "bold" but defined semantically same as HTML5.
 [^dexnode]: An index directory *is* a node but without the integer name making them **unindexed nodes**.
 [^sample]: This document is actually a lot longer than a **content node** would normally be. Usually, most of this document would be broken up into smaller nodes and aggregated back together again with **includes**.
-[^kn]: The `keg` command is frequently renamed to `kn` for easier typing.

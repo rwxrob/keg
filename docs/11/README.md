@@ -34,3 +34,5 @@ Maybe I was mistaken.
   https://developers.redhat.com/articles/2022/10/24/podman-expands-desktop
 * Podman in Action (Early access) \| Red Hat Developer  
   https://developers.redhat.com/e-books/podman-action-early-access
+* Advancing the next phase of container development with Podman Desktop  
+  https://www.redhat.com/en/blog/advancing-next-phase-container-development-podman-desktop

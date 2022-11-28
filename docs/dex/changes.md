@@ -1,3 +1,4 @@
+* 2022-11-28 03:35:15Z [Turns out git-bash doesn't support terminal escapes](../12)
 * 2022-11-28 08:30:45Z [Podman Desktop now requires WSL2](../11)
 * 2022-11-28 08:03:18Z [Q: What is a closure?](../10)
 * 2022-11-28 07:35:20Z [Idiot claiming PowerShell is better than bash](../9)

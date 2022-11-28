@@ -1,0 +1,3 @@
+# Turns out git-bash doesn't support terminal escapes
+
+... even if MS Terminal Preview does. As soon as I typed `bash` (invoking WSL2 from the git-bash prompt) all the `kn help` worked. So, um, I just don't give enough of a fuck about getting pure DOS prompts and broken git-bash to work. In fact, this has *seriously* changed my tune about installing git-bash for Windows users --- especially now that WSL1/2 are required for Podman Desktop, which is really the defacto standard for desktop containers now that Docker Desktop went all proprietary. Guess that means WSL1/2 is mandatory for Terminal Velocity Boost.

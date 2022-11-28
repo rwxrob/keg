@@ -84,3 +84,14 @@ keg help
 ## Variables
 
 `current` - current keg from `map`
+
+## Build and Release Instructions
+
+Building workflow uses the [`good`](https://github.com/rwxrob/good) Go helper tool (often composited into bonzai personal command trees (`z go`):
+
+```
+cd cmd/keg
+good build
+gh release create
+gh release upload TAGVER build/*
+```

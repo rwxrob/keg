@@ -1,8 +1,3 @@
-* 2022-11-28 03:35:15Z [Turns out git-bash doesn't support terminal escapes](../12)
-* 2022-11-28 08:30:45Z [Podman Desktop now requires WSL2](../11)
-* 2022-11-28 08:03:18Z [Q: What is a closure?](../10)
-* 2022-11-28 07:35:20Z [Idiot claiming PowerShell is better than bash](../9)
-* 2022-11-28 02:49:37Z [Added Preserve/Restore to rwxrob/fs](../8)
 * 2022-11-27 06:36:10Z [Let's start a keg](../5)
 * 2022-11-27 04:58:49Z [Which license should you use?](../7)
 * 2022-11-26 22:47:15Z [KEG specification](../6)

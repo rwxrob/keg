@@ -14,6 +14,20 @@ It's worth noting that they have a Chocolatey install now as well.
 choco install podman-desktop
 ```
 
+I did find this reference to WSL1 or WSL2:
+
+```
+How to Run Podman on Windows {via WSL and Linux} - Knowledge Base by ...
+Prerequisites. A machine running Windows 10 or 11 (For other systems, see how
+to Install Podman on Ubuntu, Install Podman on macOS).; Administrator
+privileges. Install Linux on Windows. Installing Linux distributions on Windows
+requires the WSL (WSL1 or WSL2) feature. In this tutorial, we will use WSL2
+because it offers superior performance compared to WSL1 and full system
+compatibility. phoenixnap.com/kb/podman-windows
+```
+
+Maybe I was mistaken.
+
 * Windows \| Podman Desktop  
   https://podman-desktop.io/docs/Installation/windows-install
 * Podman expands to the Desktop \| Red Hat Developer  

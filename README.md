@@ -7,16 +7,21 @@ This `keg` [Bonzai](https://github.com/rwxrob/bonzai) branch contains all KEG re
 
 ## Install
 
-This command can be installed as a standalone program or composed into a
-Bonzai command tree.
+You can just download from the [releases page](https://github.com/rwxrob/keg/releases).
 
-Standalone
+```
+curl -L https://github.com/rwxrob/keg/releases/latest/download/keg-linux-amd64 -o ~/.local/bin/keg
+curl -L https://github.com/rwxrob/keg/releases/latest/download/keg-darwin-amd64 -o ~/.local/bin/keg
+curl -L https://github.com/rwxrob/keg/releases/latest/download/keg-darwin-arm64 -o ~/.local/bin/keg
+curl -L https://github.com/rwxrob/keg/releases/latest/download/keg-windows-amd64 -o ~/.local/bin/keg
+
+```
+
+Or with `go`:
 
 ```
 go install github.com/rwxrob/keg/cmd/keg@latest
 ```
-
-Or you can just download from the [releases page](https://github.com/rwxrob/keg/releases).
 
 You might want to alias it to `kn` if you want something easier to type, or dedicate an alias to a specific keg (rather than having it detect from current directory).
 

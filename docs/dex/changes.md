@@ -1,3 +1,4 @@
+* 2022-11-28 03:03:18Z [Q: What is a closure?](../10)
 * 2022-11-28 07:35:20Z [Idiot claiming PowerShell is better than bash](../9)
 * 2022-11-28 02:49:37Z [Added Preserve/Restore to rwxrob/fs](../8)
 * 2022-11-27 06:36:10Z [Let's start a keg](../5)

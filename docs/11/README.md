@@ -16,3 +16,5 @@ choco install podman-desktop
 
 * Windows \| Podman Desktop  
   https://podman-desktop.io/docs/Installation/windows-install
+* Podman expands to the Desktop \| Red Hat Developer  
+  https://developers.redhat.com/articles/2022/10/24/podman-expands-desktop

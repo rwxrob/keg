@@ -16,6 +16,8 @@ Standalone
 go install github.com/rwxrob/keg/cmd/keg@latest
 ```
 
+Or you can just download from the [releases page](https://github.com/rwxrob/keg/releases).
+
 You might want to alias it to `kn` if you want something easier to type, or dedicate an alias to a specific keg (rather than having it detect from current directory).
 
 ```shell

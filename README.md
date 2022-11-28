@@ -15,10 +15,18 @@ Standalone
 ```
 go install github.com/rwxrob/keg/cmd/keg@latest
 ```
-Or if you prefer (easier to type)
+
+You might want to alias it to `kn` if you want something easier to type, or dedicate an alias to a specific keg (rather than having it detect from current directory).
+
+```shell
+alias zet="KEG_CURRENT=zet keg"
+```
+
+Then add something like the following to your configuration file (`keg conf edit`).
 
 ```
-go install github.com/rwxrob/keg/cmd/kn@latest
+map:
+  zet: ~/Repos/github.com/rwxrob/zet
 ```
 
 Composed
@@ -45,7 +53,6 @@ completion is done by the program itself.
 
 ```
 complete -C keg keg
-complete -C kn kn
 ```
 
 If you don't have bash or tab completion check use the shortcut
@@ -61,7 +68,6 @@ access it.
 
 ```
 keg help
-kn help
 ```
 
 ## Configuration

@@ -84,7 +84,7 @@ var Cmd = &Z.Cmd{
 	Name:      `keg`,
 	Aliases:   []string{`kn`},
 	Summary:   `create and manage knowledge exchange graphs`,
-	Version:   `v0.5.1`,
+	Version:   `v0.6.0`,
 	Copyright: `Copyright 2022 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
 	Site:      `rwxrob.tv`,

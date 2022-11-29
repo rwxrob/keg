@@ -15,6 +15,7 @@ import (
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/fs"
+	"github.com/rwxrob/fs/dir"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/help"
 	"github.com/rwxrob/term"
@@ -24,6 +25,59 @@ import (
 func init() {
 	Z.Conf.SoftInit()
 	Z.Vars.SoftInit()
+}
+
+// has to stay here because needs vars package from x
+func current(x *Z.Cmd) (*Local, error) {
+	var name, dir string
+
+	// if we have an env it beats config settings
+	name = os.Getenv(`KEG_CURRENT`)
+	if name != "" {
+		dir, _ = x.C(`map.` + name)
+		if !(dir == "" || dir == "null") {
+
+			dir = fs.Tilde2Home(dir)
+			if fs.NotExists(dir) {
+				return nil, fs.ErrNotExist{dir}
+			}
+			docsdir := filepath.Join(dir, `docs`)
+			if fs.Exists(docsdir) {
+				dir = docsdir
+			}
+			return &Local{Path: dir, Name: name}, nil
+		}
+	}
+
+	// check if current working directory has a keg
+	dir, _ = os.Getwd()
+	if fs.Exists(filepath.Join(dir, `keg`)) {
+		name = filepath.Base(dir)
+		if name == `docs` {
+			name = filepath.Base(filepath.Dir(dir))
+		}
+		return &Local{Path: dir, Name: name}, nil
+	}
+
+	// check if current working directory has a docs/keg
+	dir, _ = os.Getwd()
+	if fs.Exists(filepath.Join(dir, `docs`, `keg`)) {
+		name = filepath.Base(dir)
+		dir = filepath.Join(dir, `docs`)
+		return &Local{Path: dir, Name: name}, nil
+	}
+
+	// check vars and conf
+	name, _ = x.Get(`current`)
+	if name != "" {
+		dir, _ = x.C(`map.` + name)
+		if !(dir == "" || dir == "null") {
+			dir = fs.Tilde2Home(dir)
+			return &Local{Path: dir, Name: name}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
 var Cmd = &Z.Cmd{
@@ -41,6 +95,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
 		lastCmd, changesCmd, titleCmd, initCmd, randomCmd,
+		importCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -315,6 +370,8 @@ var lastCmd = &Z.Cmd{
 	},
 }
 
+var ChangesDefault = 5
+
 var changesCmd = &Z.Cmd{
 	Name:     `changes`,
 	Aliases:  []string{`changed`},
@@ -330,7 +387,7 @@ var changesCmd = &Z.Cmd{
 
 	Call: func(x *Z.Cmd, args ...string) error {
 		var err error
-		n := 1
+		n := ChangesDefault
 
 		if len(args) > 0 {
 			n, err = strconv.Atoi(args[0])
@@ -668,45 +725,53 @@ var randomCmd = &Z.Cmd{
 	},
 }
 
-// has to stay here because needs vars package from x
-func current(x *Z.Cmd) (*Local, error) {
-	var name, dir string
+var importCmd = &Z.Cmd{
+	Name:     `import`,
+	Usage:    `[help|(DIR|NODEDIR)...]`,
+	Summary:  `import nodes into current keg`,
+	Commands: []*Z.Cmd{help.Cmd},
 
-	// if we have an env it beats config settings
-	name = os.Getenv(`KEG_CURRENT`)
-	dir, _ = x.C(`map.` + name)
-	if !(dir == "" || dir == "null") {
-		dir = fs.Tilde2Home(dir)
-		return &Local{Path: dir, Name: name}, nil
-	}
+	Description: `
+		The {{aka}} command imports a specific NODEDIR or all the apparent
+		node directories within DIR into the current node. If no argument is
+		passed, imports the current working directory into the current keg.
+		If any of the arguments end in an integer they are assumed to be
+		node directories. Arguments without a base integer are assumed to be
+		directories containing node directories with integer identifiers.
 
-	// check if current working directory has a keg
-	dir, _ = os.Getwd()
-	if fs.Exists(filepath.Join(dir, `keg`)) {
-		name = filepath.Base(dir)
-		if name == `docs` {
-			name = filepath.Base(filepath.Dir(dir))
+		This command is useful when indirectly migrating nodes from one keg
+		into another by way of an intermediary directory (like {{pre "tmp"}})
+
+		Currently, there is no resolution of links within any of the
+		imported nodes. Each node to be imported should be checked
+		individually to ensure that any dependencies are met or adjusted.
+
+	`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
 		}
-		return &Local{Path: dir, Name: name}, nil
-	}
 
-	// check if current working directory has a docs/keg
-	dir, _ = os.Getwd()
-	if fs.Exists(filepath.Join(dir, `docs`, `keg`)) {
-		name = filepath.Base(dir)
-		dir = filepath.Join(dir, `docs`)
-		return &Local{Path: dir, Name: name}, nil
-	}
-
-	// check vars and conf
-	name, _ = x.Get(`current`)
-	if name != "" {
-		dir, _ = x.C(`map.` + name)
-		if !(dir == "" || dir == "null") {
-			dir = fs.Tilde2Home(dir)
-			return &Local{Path: dir, Name: name}, nil
+		if len(args) == 0 {
+			d := dir.Abs()
+			if d == "" {
+				return fmt.Errorf("unable to determine absolute path to current directory")
+			}
+			args = append(args, d)
 		}
-	}
 
-	return nil, fmt.Errorf("no kegs found") // FIXME with better error
+		if err := Import(keg.Path, args...); err != nil {
+			return err
+		}
+
+		if err := MakeDex(keg.Path); err != nil {
+			return err
+		}
+
+		return Publish(keg.Path)
+
+	},
 }

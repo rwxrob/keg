@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -122,17 +121,6 @@ func MakeDex(kegdir string) error {
 	return UpdateUpdated(kegdir)
 }
 
-// ImportNode moves the nodedir into the KEG directory for the kegid giving
-// it the nodeid name. Import will fail if the given nodeid already
-// existing the the target KEG.
-func ImportNode(from, to, nodeid string) error {
-	to = path.Join(to, nodeid)
-	if _fs.Exists(to) {
-		return _fs.ErrorExists{to}
-	}
-	return os.Rename(from, to)
-}
-
 // UpdateUpdated sets the updated YAML field in the keg info file.
 func UpdateUpdated(kegpath string) error {
 	kegfile := filepath.Join(kegpath, `keg`)
@@ -182,6 +170,23 @@ func Last(kegpath string) *DexEntry {
 		return nil
 	}
 	return dex.Last()
+}
+
+// Next returns a new DexEntry with its integer identify set to the next
+// integer after Last and returns nil if cannot determine which is next.
+// The updated time stamp is set to the current time even though the
+// DexEntry may not have yet been written to disk and its time would be
+// different from the actual time written. This is to save the overhead
+// of grabbing it again once written.
+func Next(kegpath string) *DexEntry {
+	last := Last(kegpath)
+	if last == nil {
+		return nil
+	}
+	entry := new(DexEntry)
+	entry.U = time.Now().UTC()
+	entry.N = last.N + 1
+	return entry
 }
 
 // UpdatedString returns Updated time as a string or an empty string if
@@ -264,16 +269,22 @@ func Edit(kegpath string, id int) error {
 // add the new entry without any further validation. The updated Dex is
 // then written to the dex/changes.md file.
 func DexUpdate(kegpath string, entry *DexEntry) error {
+
 	if !HaveDex(kegpath) {
 		if err := MakeDex(kegpath); err != nil {
 			return err
 		}
 	}
-	entry.Update(kegpath)
+
+	if err := entry.Update(kegpath); err != nil {
+		return err
+	}
+
 	dex, err := ReadDex(kegpath)
 	if err != nil {
 		return err
 	}
+
 	found := dex.Lookup(entry.N)
 	if found == nil {
 		dex.Add(entry)
@@ -281,6 +292,7 @@ func DexUpdate(kegpath string, entry *DexEntry) error {
 		found.U = entry.U
 		found.T = entry.T
 	}
+
 	return WriteDex(kegpath, dex)
 }
 
@@ -313,4 +325,54 @@ func WriteSample(kegpath string, entry *DexEntry) error {
 		filepath.Join(kegpath, entry.ID(), `README.md`),
 		SampleNodeReadme,
 	)
+}
+
+// Import imports the targets into the kegpath creating new, unique
+// identifiers for each. If the target ends with an integer it is
+// assumed to be a node directory. If not, it is assumed to contain node
+// directories with integer identifiers. Currently, there is no
+// resolution of any links contained within any node README.md file.
+func Import(kegpath string, targets ...string) error {
+	if !fs.IsDir(kegpath) {
+		return fmt.Errorf("not a directory or does not exist: %v", kegpath)
+	}
+	for _, target := range targets {
+		if fs.NameIsInt(target) {
+			if err := ImportNode(kegpath, target); err != nil {
+				return err
+			}
+			continue
+		}
+		dirs, _, _ := fs.IntDirs(target)
+		for _, dir := range dirs {
+			if err := ImportNode(kegpath, dir.Path); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// ImportNode imports a single specific directory into the kegpath by
+// getting the next integer identifier and moving the target into the
+// kegpath with an os.Rename (which has limitations based on the host
+// operating system's handling of cross-file system boundaries).
+func ImportNode(kegpath, target string) error {
+	var err error
+
+	next := Next(kegpath)
+	if next == nil {
+		return fmt.Errorf(`could not determine next node id for %v`, target)
+	}
+
+	next.T, err = kegml.ReadTitle(filepath.Join(target, `README.md`))
+	if err != nil {
+		return err
+	}
+
+	if err := os.Rename(target, filepath.Join(kegpath, next.ID())); err != nil {
+		return err
+	}
+
+	return DexUpdate(kegpath, next)
 }

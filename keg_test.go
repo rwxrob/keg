@@ -96,3 +96,11 @@ func ExampleWriteDex() {
 	// ignored
 }
 */
+
+func ExampleNext() {
+	fmt.Println(keg.Next(`testdata/samplekeg`).N)
+	fmt.Println(keg.Next(`testdata/noexist`))
+	// Output:
+	// 13
+	// <nil>
+}

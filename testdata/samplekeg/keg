@@ -26,7 +26,7 @@ summary:
     au bufnewfile,bufRead keg set ft=yaml
 
 indexes:
-  - file: dex/latest.md
+  - file: dex/changes.md
     summary: latest changes
   - file: dex/nodes.tsv
     summary: all nodes by id

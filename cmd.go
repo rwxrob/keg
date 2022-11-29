@@ -616,6 +616,15 @@ var createCmd = &Z.Cmd{
 			return err
 		}
 
+		path := filepath.Join(keg.Path, entry.ID(), `README.md`)
+
+		if file.IsEmpty(path) {
+			if err = os.RemoveAll(filepath.Dir(path)); err != nil {
+				return err
+			}
+			return nil
+		}
+
 		if err := DexUpdate(keg.Path, entry); err != nil {
 			return err
 		}

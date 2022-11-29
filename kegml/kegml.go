@@ -2,7 +2,7 @@ package kegml
 
 import (
 	_ "embed"
-	"os"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -58,19 +58,27 @@ func ParseTitle(s pegn.Scanner) *ast.Node {
 	return &ast.Node{T: Title, V: string(buf)}
 }
 
+var Scanner pegn.Scanner
+
+func init() {
+	Scanner = scanner.New()
+	Scanner.SetErrFmtFunc(
+		func(e error) string {
+			return fmt.Sprintf("custom %q\n", e)
+		})
+}
+
 // ReadTitle reads a KEG node title from KEGML file.
 func ReadTitle(path string) (string, error) {
 	if !strings.HasSuffix(path, `README.md`) {
 		path = filepath.Join(path, `README.md`)
 	}
-	f, err := os.Open(path)
-	if err != nil {
+	if err := Scanner.Open(path); err != nil {
 		return "", err
 	}
-	s := scanner.New(f)
-	nd := ParseTitle(s)
+	nd := ParseTitle(Scanner)
 	if nd == nil {
-		return "", s
+		return "", Scanner
 	}
 	return nd.V, nil
 }

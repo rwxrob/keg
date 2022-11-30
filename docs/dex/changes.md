@@ -1,3 +1,4 @@
+* 2022-11-29 23:35:46Z [Sample content node](../9)
 * 2022-11-27 06:36:10Z [Let's start a keg](../5)
 * 2022-11-27 04:58:49Z [Which license should you use?](../7)
 * 2022-11-26 22:47:15Z [KEG specification](../6)

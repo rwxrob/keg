@@ -3,15 +3,16 @@ module github.com/rwxrob/keg
 go 1.18
 
 require (
-	github.com/rwxrob/bonzai v0.20.2
+	github.com/rwxrob/bonzai v0.20.5
 	github.com/rwxrob/choose v0.2.1
 	github.com/rwxrob/conf v0.8.2
 	github.com/rwxrob/fs v0.17.2
+	github.com/rwxrob/grep v0.2.0
 	github.com/rwxrob/help v0.7.0
 	github.com/rwxrob/json v0.8.0
-	github.com/rwxrob/pegn v0.1.0
+	github.com/rwxrob/pegn v0.2.1
 	github.com/rwxrob/term v0.2.8
-	github.com/rwxrob/to v0.11.3
+	github.com/rwxrob/to v0.12.1
 	github.com/rwxrob/vars v0.5.0
 )
 
@@ -21,7 +22,7 @@ require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/elliotchance/orderedmap v1.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/goccy/go-json v0.9.11 // indirect
+	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/goccy/go-yaml v1.9.6 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect

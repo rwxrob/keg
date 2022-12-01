@@ -17,8 +17,10 @@ import (
 	"github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/dir"
 	"github.com/rwxrob/fs/file"
+	"github.com/rwxrob/grep"
 	"github.com/rwxrob/help"
 	"github.com/rwxrob/term"
+	"github.com/rwxrob/to"
 	"github.com/rwxrob/vars"
 )
 
@@ -95,7 +97,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
 		lastCmd, changesCmd, titleCmd, initCmd, randomCmd,
-		importCmd,
+		importCmd, grepCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -782,5 +784,64 @@ var importCmd = &Z.Cmd{
 
 		return Publish(keg.Path)
 
+	},
+}
+
+var grepCmd = &Z.Cmd{
+	Name:     `grep`,
+	Usage:    `(help|REGEXP)`,
+	MinArgs:  1,
+	Summary:  `grep regular expression out of all nodes`,
+	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{aka}} performs a simple regular expression grep of all node
+		README.md files. (Does not depend on host {{pre grep}} command.
+
+	`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
+		}
+		dirs, _, _ := fs.IntDirs(keg.Path)
+		dpaths := []string{}
+		for _, d := range dirs {
+			dpaths = append(dpaths, filepath.Join(d.Path, `README.md`))
+		}
+		col := int(term.WinSize.Col) - 14
+		results, err := grep.This(args[0], col, dpaths...)
+		if err != nil {
+			return err
+		}
+		if term.IsInteractive() {
+			for _, hit := range results.Hits {
+				id := filepath.Base(filepath.Dir(hit.File))
+				match := to.CrunchSpaceVisible(hit.Text[hit.TextBeg:hit.TextEnd])
+				before := to.CrunchSpaceVisible(hit.Text[0:hit.TextBeg])
+				after := to.CrunchSpaceVisible(hit.Text[hit.TextEnd:])
+				side := (col - len(match)) / 2
+				end := side
+				if len(after) < end {
+					end = len(after)
+				}
+				out := before[side:] + term.Magenta + match + term.X + after[:end]
+				fmt.Printf("%v%6v%v %v\n", term.Green, id, term.X, out)
+			}
+			return nil
+		}
+		dex, err := ReadDex(keg.Path)
+		if err != nil {
+			return err
+		}
+		for _, hit := range results.Hits {
+			id, err := strconv.Atoi(filepath.Base(filepath.Dir(hit.File)))
+			if err != nil {
+				return err
+			}
+			fmt.Println(dex.Lookup(id).MD())
+		}
+		return nil
 	},
 }

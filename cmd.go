@@ -86,7 +86,7 @@ var Cmd = &Z.Cmd{
 	Name:      `keg`,
 	Aliases:   []string{`kn`},
 	Summary:   `create and manage knowledge exchange graphs`,
-	Version:   `v0.6.0`,
+	Version:   `v0.6.1`,
 	Copyright: `Copyright 2022 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
 	Site:      `rwxrob.tv`,
@@ -821,12 +821,22 @@ var grepCmd = &Z.Cmd{
 				match := to.CrunchSpaceVisible(hit.Text[hit.TextBeg:hit.TextEnd])
 				before := to.CrunchSpaceVisible(hit.Text[0:hit.TextBeg])
 				after := to.CrunchSpaceVisible(hit.Text[hit.TextEnd:])
-				side := (col - len(match)) / 2
-				end := side
-				if len(after) < end {
-					end = len(after)
+				width := len(match) + len(before) + len(after)
+				if width > col {
+					chop := (width - col) / 2
+					lafter := len(after)
+					lbefore := len(before)
+					switch {
+					case lbefore > chop && lafter > chop:
+						after = after[:len(after)-chop]
+						before = before[chop:]
+					case lbefore > chop && lafter < chop:
+						before = before[chop-(chop-lafter):]
+					case lafter > chop && lbefore < chop:
+						after = after[:len(after)-(chop-lbefore)]
+					}
 				}
-				out := before[side:] + term.Magenta + match + term.X + after[:end]
+				out := before + term.Red + match + term.X + after
 				fmt.Printf("%v%6v%v %v\n", term.Green, id, term.X, out)
 			}
 			return nil

@@ -131,9 +131,9 @@ func (d *Dex) MarshalJSON() ([]byte, error) {
 // Lookup does a linear search through the Dex for one with the passed
 // id and if found returns, otherwise returns nil.
 func (d Dex) Lookup(id int) *DexEntry {
-	for _, i := range d {
-		if i.N == id {
-			return &d[id]
+	for i, node := range d {
+		if node.N == id {
+			return &d[i]
 		}
 	}
 	return nil

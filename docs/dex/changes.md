@@ -1,3 +1,4 @@
+* 2022-12-02 02:06:20Z [Add default columns when cannot be determined](../13)
 * 2022-12-02 02:44:05Z [Q: How do I disable case-insensitive matching?](../11)
 * 2022-12-02 01:45:15Z [Planned additions](../10)
 * 2022-11-30 04:35:46Z [Sample content node](../9)

@@ -7,11 +7,11 @@ require (
 	github.com/rwxrob/choose v0.2.1
 	github.com/rwxrob/conf v0.8.2
 	github.com/rwxrob/fs v0.17.2
-	github.com/rwxrob/grep v0.2.3
+	github.com/rwxrob/grep v0.2.5
 	github.com/rwxrob/help v0.7.0
 	github.com/rwxrob/json v0.8.0
 	github.com/rwxrob/pegn v0.2.1
-	github.com/rwxrob/term v0.2.8
+	github.com/rwxrob/term v0.2.9
 	github.com/rwxrob/to v0.12.1
 	github.com/rwxrob/vars v0.5.0
 )

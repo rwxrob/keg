@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -28,6 +29,8 @@ func init() {
 	Z.Conf.SoftInit()
 	Z.Vars.SoftInit()
 }
+
+var DefColumns = 100
 
 // has to stay here because needs vars package from x
 func current(x *Z.Cmd) (*Local, error) {
@@ -87,6 +90,7 @@ var Cmd = &Z.Cmd{
 	Aliases:   []string{`kn`},
 	Summary:   `create and manage knowledge exchange graphs`,
 	Version:   `v0.6.1`,
+	UseVars:   true,
 	Copyright: `Copyright 2022 Robert S Muhlestein`,
 	License:   `Apache-2.0`,
 	Site:      `rwxrob.tv`,
@@ -102,6 +106,7 @@ var Cmd = &Z.Cmd{
 
 	Shortcuts: Z.ArgMap{
 		`set`:    {`var`, `set`},
+		`get`:    {`var`, `get`},
 		`sample`: {`create`, `sample`},
 	},
 
@@ -190,7 +195,8 @@ var titleCmd = &Z.Cmd{
 	Name:     `titles`,
 	Aliases:  []string{`title`},
 	Summary:  `find titles containing keyword`,
-	Commands: []*Z.Cmd{help.Cmd},
+	UseVars:  true,
+	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -204,18 +210,30 @@ var titleCmd = &Z.Cmd{
 		}
 
 		var dex *Dex
-		str := strings.Join(args, " ")
 		dex, err = ReadDex(keg.Path)
 		if err != nil {
 			return err
 		}
 
+		pre, err := x.Caller.Get(`regxpre`)
+		if err != nil {
+			return err
+		}
+		if pre == "" {
+			pre = `(?i)`
+		}
+
+		re, err := regexp.Compile(pre + args[0])
+		if err != nil {
+			return err
+		}
+
 		if term.IsInteractive() {
-			Z.Page(dex.WithTitleText(str).Pretty())
+			Z.Page(dex.WithTitleTextExp(re).Pretty())
 			return nil
 		}
 
-		fmt.Print(dex.WithTitleText(str).AsIncludes())
+		fmt.Print(dex.WithTitleTextExp(re).AsIncludes())
 		return nil
 	},
 }
@@ -379,8 +397,7 @@ var changesCmd = &Z.Cmd{
 	Aliases:  []string{`changed`},
 	Usage:    `[help|COUNT|default|set default COUNT]`,
 	Summary:  `show most recent n nodes changed`,
-	UseVars:  true,
-	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
+	Commands: []*Z.Cmd{help.Cmd},
 
 	Shortcuts: Z.ArgMap{
 		`default`: {`var`, `get`, `default`},
@@ -553,8 +570,20 @@ var editCmd = &Z.Cmd{
 					return err
 				}
 
-				key := strings.Join(args, " ")
-				choice := dex.ChooseWithTitleText(key)
+				pre, err := x.Caller.Get(`regxpre`)
+				if err != nil {
+					return err
+				}
+				if pre == "" {
+					pre = `(?i)`
+				}
+
+				re, err := regexp.Compile(pre + args[0])
+				if err != nil {
+					return err
+				}
+
+				choice := dex.ChooseWithTitleTextExp(re)
 				if choice == nil {
 					return fmt.Errorf("unable to choose a title")
 				}
@@ -801,20 +830,45 @@ var grepCmd = &Z.Cmd{
 	`,
 
 	Call: func(x *Z.Cmd, args ...string) error {
+
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
 		}
+
 		dirs, _, _ := fs.IntDirs(keg.Path)
 		dpaths := []string{}
 		for _, d := range dirs {
 			dpaths = append(dpaths, filepath.Join(d.Path, `README.md`))
 		}
-		col := int(term.WinSize.Col) - 14
+
+		// figure out columns (yes it's complicated)
+		col := int(term.WinSize.Col) // only > 0 for interactive terminals
+		if col <= 0 {
+
+			colstr, err := x.Caller.Get(`columns`)
+			if err != nil {
+				return err
+			}
+
+			if colstr != "" {
+				col, err = strconv.Atoi(colstr)
+				if err != nil {
+					return err
+				}
+			}
+
+			if col <= 0 {
+				col = DefColumns
+			}
+		}
+
+		col -= 14
 		results, err := grep.This(args[0], col, dpaths...)
 		if err != nil {
 			return err
 		}
+
 		if term.IsInteractive() {
 			for _, hit := range results.Hits {
 				id := filepath.Base(filepath.Dir(hit.File))
@@ -841,6 +895,7 @@ var grepCmd = &Z.Cmd{
 			}
 			return nil
 		}
+
 		dex, err := ReadDex(keg.Path)
 		if err != nil {
 			return err
@@ -850,7 +905,7 @@ var grepCmd = &Z.Cmd{
 			if err != nil {
 				return err
 			}
-			fmt.Println(dex.Lookup(id).MD())
+			fmt.Println(dex.Lookup(id).AsInclude())
 		}
 		return nil
 	},

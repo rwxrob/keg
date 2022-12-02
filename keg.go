@@ -55,7 +55,7 @@ func ParseDex(in any) (*Dex, error) {
 			if i, err := strconv.Atoi(f[3]); err != nil {
 				return nil, err
 			} else {
-				dex = append(dex, DexEntry{U: t, T: f[2], N: i})
+				dex = append(dex, &DexEntry{U: t, T: f[2], N: i})
 			}
 		}
 	}
@@ -89,7 +89,7 @@ func ScanDex(kegdir string) (*Dex, error) {
 		if err != nil {
 			continue
 		}
-		entry := DexEntry{U: i.ModTime().UTC(), T: title, N: id}
+		entry := &DexEntry{U: i.ModTime().UTC(), T: title, N: id}
 		dex = append(dex, entry)
 	}
 	return &dex, nil
@@ -159,7 +159,7 @@ func LastChanged(kegpath string) *DexEntry {
 	if err != nil {
 		return nil
 	}
-	return &(*dex)[0]
+	return (*dex)[0]
 }
 
 // Last returns the last created content node. If cannot determine

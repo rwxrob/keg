@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -29,9 +30,11 @@ type Local struct {
 // DexEntry represents a single line in an index (usually the changes.md
 // or nodes.tsv file). All three fields are always required.
 type DexEntry struct {
-	U time.Time // updated
-	T string    // title
-	N int       // node id (also see ID)
+	U    time.Time // updated
+	T    string    // title
+	N    int       // node id (also see ID)
+	HBeg int       // start of highlighted
+	HEnd int       // end of highlighted
 }
 
 // Update gets the entry for the target keg at kegpath by looking up the
@@ -61,13 +64,13 @@ func (e *DexEntry) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (e DexEntry) TSV() string {
+func (e *DexEntry) TSV() string {
 	return fmt.Sprintf("%v\t%v\t%v", e.N, e.U.Format(IsoDateFmt), e.T)
 }
 
 // ID returns the node identifier as a string instead of an integer.
 // Returns an empty string if unable to parse the integer.
-func (e DexEntry) ID() string { return strconv.Itoa(e.N) }
+func (e *DexEntry) ID() string { return strconv.Itoa(e.N) }
 
 // MD returns the entry as a single Markdown list item for inclusion in
 // the dex/nodex.md file:
@@ -78,7 +81,7 @@ func (e DexEntry) ID() string { return strconv.Itoa(e.N) }
 //
 // Note that the second of last change is based on *any* file within the
 // node directory changing, not just the README.md or meta files.
-func (e DexEntry) MD() string {
+func (e *DexEntry) MD() string {
 	return fmt.Sprintf(
 		"* %v [%v](../%v)",
 		e.U.Format(IsoDateFmt),
@@ -91,18 +94,25 @@ func (e DexEntry) String() string { return e.MD() }
 
 // Asinclude returns a KEGML include link list item without the time
 // suitable for creating include blocks in node files.
-func (e DexEntry) AsInclude() string {
+func (e *DexEntry) AsInclude() string {
 	return fmt.Sprintf("* [%v](../%v)", e.T, e.N)
 }
 
 // Pretty returns a string with pretty colors.
-func (e DexEntry) Pretty() string {
+func (e *DexEntry) Pretty() string {
 	nwidth := len(e.ID())
+	text := e.T
+	if e.HBeg > 0 || e.HEnd > 0 {
+		before := e.T[0:e.HBeg]
+		hilight := e.T[e.HBeg:e.HEnd]
+		after := e.T[e.HEnd:]
+		text = before + term.Red + hilight + term.White + after
+	}
 	return fmt.Sprintf(
 		"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
 		term.Black, e.U.Format(`2006-01-02 15:04Z`),
 		term.Green, e.N,
-		term.White, e.T,
+		term.White, text,
 		term.Reset,
 	)
 }
@@ -111,7 +121,7 @@ func (e DexEntry) Pretty() string {
 
 // Dex is a collection of DexEntry structs. This allows mapping methods
 // for its serialization to different output formats.
-type Dex []DexEntry
+type Dex []*DexEntry
 
 // MarshalJSON produces JSON text that contains one DexEntry per line
 // that has not been HTML escaped (unlike the default).
@@ -133,7 +143,7 @@ func (d *Dex) MarshalJSON() ([]byte, error) {
 func (d Dex) Lookup(id int) *DexEntry {
 	for i, node := range d {
 		if node.N == id {
-			return &d[i]
+			return d[i]
 		}
 	}
 	return nil
@@ -175,24 +185,24 @@ func (e Dex) TSV() string {
 
 // Last returns the DexEntry with the highest integer value identifier.
 func (d Dex) Last() *DexEntry {
-	var last DexEntry
+	last := new(DexEntry)
 	for _, e := range d {
 		if e.N > last.N {
 			last = e
 		}
 	}
-	return &last
+	return last
 }
 
 // LastChanged returns the highest integer value identifier.
 func (d Dex) LastChanged() *DexEntry {
-	var last DexEntry
+	last := new(DexEntry)
 	for _, e := range d {
 		if e.U.After(last.U) {
 			last = e
 		}
 	}
-	return &last
+	return last
 }
 
 // LastIdString returns Last as string.
@@ -213,11 +223,18 @@ func (d Dex) Pretty() string {
 	var str string
 	nwidth := d.LastIdWidth()
 	for _, e := range d {
+		text := e.T
+		if e.HBeg > 0 || e.HEnd > 0 {
+			before := e.T[0:e.HBeg]
+			hilight := e.T[e.HBeg:e.HEnd]
+			after := e.T[e.HEnd:]
+			text = before + term.Red + hilight + term.White + after
+		}
 		str += fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
 			term.Black, e.U.Format(`2006-01-02 15:04Z`),
 			term.Green, e.N,
-			term.White, e.T,
+			term.White, text,
 			term.Reset,
 		)
 	}
@@ -230,11 +247,18 @@ func (d Dex) PrettyLines() []string {
 	lines := make([]string, 0, len(d))
 	nwidth := d.LastIdWidth()
 	for _, e := range d {
+		text := e.T
+		if e.HBeg > 0 || e.HEnd > 0 {
+			before := e.T[0:e.HBeg]
+			hilight := e.T[e.HBeg:e.HEnd]
+			after := e.T[e.HEnd:]
+			text = before + term.Red + hilight + term.White + after
+		}
 		lines = append(lines, fmt.Sprintf(
 			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
 			term.Black, e.U.Format(`2006-01-02 15:04Z`),
 			term.Green, e.N,
-			term.White, e.T,
+			term.White, text,
 			term.Reset,
 		))
 	}
@@ -261,15 +285,33 @@ func (d Dex) ByChanges() Dex {
 
 // Add appends the entry to the Dex.
 func (d *Dex) Add(entry *DexEntry) {
-	(*d) = append((*d), *entry)
+	(*d) = append((*d), entry)
 }
 
 // WithTitleText returns a new Dex from self with all nodes that do not
 // contain the text substring in the title filtered out.
-func (e Dex) WithTitleText(keyword string) Dex {
+func (e *Dex) WithTitleText(keyword string) Dex {
 	dex := Dex{}
-	for _, d := range e {
-		if strings.Index(strings.ToLower(d.T), strings.ToLower(keyword)) >= 0 {
+	for _, d := range *e {
+		i := strings.Index(strings.ToLower(d.T), strings.ToLower(keyword))
+		if i >= 0 {
+			d.HBeg = i
+			d.HEnd = i + len(keyword)
+			dex = append(dex, d)
+		}
+	}
+	return dex
+}
+
+// WithTitleTextExp returns a new Dex from self with all nodes that do not
+// contain the regular expression matches in the title filtered out.
+func (e *Dex) WithTitleTextExp(re *regexp.Regexp) Dex {
+	dex := Dex{}
+	for _, d := range *e {
+		i := re.FindStringIndex(d.T)
+		if i != nil {
+			d.HBeg = i[0]
+			d.HEnd = i[1]
 			dex = append(dex, d)
 		}
 	}
@@ -279,11 +321,11 @@ func (e Dex) WithTitleText(keyword string) Dex {
 // ChooseWithTitleText returns a single *DexEntry for the keyword
 // passed. If there are more than one then user is prompted to choose
 // from list sent to the terminal.
-func (d Dex) ChooseWithTitleText(key string) *DexEntry {
+func (d *Dex) ChooseWithTitleText(key string) *DexEntry {
 	hits := d.WithTitleText(key)
 	switch len(hits) {
 	case 1:
-		return &hits[0]
+		return hits[0]
 	case 0:
 		return nil
 	default:
@@ -294,7 +336,29 @@ func (d Dex) ChooseWithTitleText(key string) *DexEntry {
 		if i < 0 {
 			return nil
 		}
-		return &hits[i]
+		return hits[i]
+	}
+}
+
+// ChooseWithTitleTextExp returns a single *DexEntry for the regular
+// expression matches passed. If there are more than one then user is
+// prompted to choose from list sent to the terminal.
+func (d *Dex) ChooseWithTitleTextExp(re *regexp.Regexp) *DexEntry {
+	hits := d.WithTitleTextExp(re)
+	switch len(hits) {
+	case 1:
+		return hits[0]
+	case 0:
+		return nil
+	default:
+		i, _, err := choose.From(hits.PrettyLines())
+		if err != nil {
+			return nil
+		}
+		if i < 0 {
+			return nil
+		}
+		return hits[i]
 	}
 }
 
@@ -302,5 +366,5 @@ func (d Dex) ChooseWithTitleText(key string) *DexEntry {
 func (d Dex) Random() *DexEntry {
 	rand.Seed(time.Now().UnixNano())
 	i := rand.Intn(len(d))
-	return &d[i]
+	return d[i]
 }

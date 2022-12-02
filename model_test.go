@@ -17,7 +17,7 @@ func ExampleDex_json() {
 	}
 	fmt.Println(string(byt))
 	// Output:
-	// {"U":"2022-12-10T06:10:04Z","T":"Some title","N":2}
+	// {"U":"2022-12-10T06:10:04Z","T":"Some title","N":2,"HBeg":0,"HEnd":0}
 
 }
 
@@ -72,4 +72,18 @@ func ExampleHaveDex() {
 	// Output:
 	// true
 	// false
+}
+
+func ExampleDexEntry_Pretty() {
+
+	e := keg.DexEntry{T: "Some"}
+	fmt.Printf("%q\n", e.Pretty())
+	e.HBeg = 2
+	e.HEnd = 3
+	fmt.Printf("%q\n", e.Pretty())
+
+	// Output:
+	// "\x1b[30m0001-01-01 00:00Z \x1b[32m0 \x1b[37mSome\x1b[0m\n"
+	// "\x1b[30m0001-01-01 00:00Z \x1b[32m0 \x1b[37mSo\x1b[31mm\x1b[37me\x1b[0m\n"
+
 }

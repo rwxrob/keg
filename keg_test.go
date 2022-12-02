@@ -104,3 +104,11 @@ func ExampleNext() {
 	// 13
 	// <nil>
 }
+
+func ExampleLast() {
+	fmt.Println(keg.Last(`testdata/samplekeg`).N)
+	fmt.Println(keg.Last(`testdata/noexist`))
+	// Output:
+	// 12
+	// <nil>
+}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -19,6 +20,7 @@ import (
 	"github.com/rwxrob/fs/dir"
 	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/keg/kegml"
+	"github.com/rwxrob/term"
 	"github.com/rwxrob/to"
 )
 
@@ -203,8 +205,8 @@ func UpdatedString(kegpath string) string {
 // Publish publishes the keg at kegpath location to its distribution
 // targets listed in the keg file under "publish." Currently, this only
 // involves looking for a .git directory and if found doing a git
-// add/commit/push. Git commit messages are always based on the latest
-// node title without any verb.
+// pull/add/commit/push. Git commit messages are always based on the
+// latest node title without any verb.
 func Publish(kegpath string) error {
 	gitd, err := fs.HereOrAbove(`.git`)
 	if err != nil {
@@ -217,7 +219,12 @@ func Publish(kegpath string) error {
 	defer os.Chdir(origd)
 	os.Chdir(filepath.Dir(gitd))
 	if err := Z.Exec(`git`, `-C`, kegpath, `pull`); err != nil {
-		return err
+		if _, is := err.(*exec.ExitError); is {
+			return fmt.Errorf(
+				"%vNo remote repo has been setup.%v First create it and git push to it.",
+				term.Red, term.X,
+			)
+		}
 	}
 	if err := Z.Exec(`git`, `-C`, kegpath, `add`, `-A`, `.`); err != nil {
 		return err

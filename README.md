@@ -23,17 +23,11 @@ Or with `go`:
 go install github.com/rwxrob/keg/cmd/keg@latest
 ```
 
-You might want to alias it to `kn` if you want something easier to type, or dedicate an alias to a specific keg (rather than having it detect from current directory).
+You might want to create a small script to encapsulate `KEG_CURRENT` rather than changing into the directory all the time. Note that aliases and functions do not reliably work from within `vim`, only executables (which is 80% of the reason to use `keg` in the first place).
 
 ```shell
-alias zet="KEG_CURRENT=zet keg"
-```
-
-Then add something like the following to your configuration file (`keg conf edit`).
-
-```
-map:
-  zet: ~/Repos/github.com/rwxrob/zet
+#!/bin/bash
+KEG_CURRENT=zet keg "$@"
 ```
 
 Composed

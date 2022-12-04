@@ -104,9 +104,23 @@ func ScanDex(kegdir string) (*Dex, error) {
 // update (changes.md) and a tab-delimited file sorted numerically by
 // node ID (nodes.tsv) are created.
 func MakeDex(kegdir string) error {
-	dex, err := ScanDex(kegdir)
+	_dex, err := ScanDex(kegdir)
 	if err != nil {
 		return err
+	}
+
+	// remove any empties that might have crept in
+	dex := Dex{}
+	for _, entry := range *_dex {
+		d := filepath.Join(kegdir, entry.ID())
+		if dir.IsEmpty(d) {
+			log.Println("deleting", d)
+			if err := os.RemoveAll(d); err != nil {
+				return err
+			}
+			continue
+		}
+		dex = append(dex, entry)
 	}
 
 	// markdown is first since reverse chrono of updates is default

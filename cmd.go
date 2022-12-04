@@ -121,7 +121,7 @@ var Cmd = &Z.Cmd{
 		training, team knowledge, or publishing a paper, article, blog, or
 		book.
 		
-		Getting Started
+		Getting Started (without Git)
 		
 		1. Create a directory and change into it
 		2. Run the {{cmd "init"}} command
@@ -134,8 +134,29 @@ var Cmd = &Z.Cmd{
 		9. Check your index with {{cmd "changes"}} or {{cmd "titles"}}
 		10. Repeat 6-9 creating several nodes (optionally omitting {{cmd "sample"}})
 		11. Search titles with the {{cmd "titles"}} command
-		12. Edit node with keywords with {{cmd "edit WORD"}} command
-		13. Notice that {{cmd "edit"}} is the default (ex: {{cmd .Name}} WORD)
+		12. Edit node with title keywords with {{cmd "edit WORD"}} command
+		13. Edit node with grep regexp matches with {{cmd "grep WORD"}} command
+		14. Notice that {{cmd "edit"}} is the default (ex: {{cmd .Name}} WORD)
+
+		Getting Started (with Git and GitHub)
+
+		It's important when using Git that either the remote git repo has
+		been fully created (so that {{cmd "git pull"}} will work) or that
+		{{cmd "git"}} has not been run at all (no {{pre ".git"}} directory).
+		Otherwise, {{aka}} will attempt to pull and fail. These instructions
+		assume the reader understands {{cmd "git"}} and the {{cmd "gh"}}
+		commands.
+
+		1. Create a directory and change into it
+		2. Run the {{cmd "init"}} command
+		3. Update the YAML file it opens
+		4. Exit your editor
+		5. Create and push as Git repo with {{cmd "gh repo create"}}
+		6. Continue with steps 9+ from Getting Started
+
+		Alternatively, one can simply create a GitHub repo from the web site
+		and {{cmd "git clone"}} it down to the local machine and then run
+		{{cmd "init"}} from within it.
 		
 		Learning KEG Markup Language
 		
@@ -474,9 +495,11 @@ var initCmd = &Z.Cmd{
 		linking to planned content from other content nodes.
 
 		Finally, {{aka}} creates the {{pre "dex/changes.md"}} and
-		{{pre "dex/nodex.tsv"}} index files and updates the {{pre "keg"}} file
-		update field to match the latest update (effectively the same as calling
-		{{cmd "dex update"}}).
+		{{pre "dex/nodes.tsv"}} index files and updates the {{pre "keg"}} file
+		{{pre "updated"}} field to match the latest update (effectively the
+		same as calling {{cmd "dex update"}}).
+
+		Also see the *Getting Started* docs in the main {{cmd "help"}} command.
 
 	`,
 

@@ -988,11 +988,16 @@ var grepCmd = &Z.Cmd{
 		if err != nil {
 			return err
 		}
+		var lastid int
 		for _, hit := range results.Hits {
 			id, err := strconv.Atoi(filepath.Base(filepath.Dir(hit.File)))
 			if err != nil {
 				return err
 			}
+			if id == lastid {
+				continue
+			}
+			lastid = id
 			fmt.Println(dex.Lookup(id).AsInclude())
 		}
 		return nil

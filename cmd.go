@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/charmbracelet/glamour"
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/fs"
@@ -101,7 +102,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
 		lastCmd, changesCmd, titleCmd, initCmd, randomCmd,
-		importCmd, grepCmd,
+		importCmd, grepCmd, viewCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -994,6 +995,154 @@ var grepCmd = &Z.Cmd{
 			}
 			fmt.Println(dex.Lookup(id).AsInclude())
 		}
+		return nil
+	},
+}
+
+//go:embed testdata/keg-dark.json
+var dark []byte
+
+//go:embed testdata/keg-notty.json
+var notty []byte
+
+var viewCmd = &Z.Cmd{
+	Name:     `view`,
+	Summary:  `view a specific node`,
+	Usage:    `(help|ID|REGEXP)`,
+	Params:   []string{`last`, `same`},
+	MinArgs:  1,
+	Commands: []*Z.Cmd{help.Cmd},
+
+	Description: `
+		The {{aka}} command renders a specific node for viewing in the
+		terminal suitable for being cutting and pasting into other text
+		documents and description fields. The argument passed may be an
+		integer ID or a regular expression to be matched in the title text
+		(as with {{cmd "edit"}} and {{cmd "title"}} commands. When matting
+		a REGEXP case insensitive matching is assumed (prefix {{pre "(?i)"}}
+		is added. (See {{cmd "grep"}} for how this default an be changed.)
+
+		The {{aka}} command uses the https://github.com/charmbracelet/glamour
+		package for rendering markdown directly to the terminal and
+		therefore can be customized by setting the GLAMOUR_STYLE environment
+		variable for those who wish. Since the popular GitHub command line
+		utility uses this as well the same customization can be applied to
+		both {{cmd "keg"}} and {{cmd "gh"}}.  By default, a variation on the
+		{{pre "dark"}} style is used with line wrapping and margins disabled
+		(for better cutting and pasting). To get a full copy of the style
+		JSON used see the {{cmd "style"}} command.
+
+		If the output is not to a terminal then the {{pre "notty"}} Glamour
+		theme is used automatically.
+		
+	`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
+		}
+
+		id := args[0]
+
+		switch id {
+
+		case "same":
+			if n := LastChanged(keg.Path); n != nil {
+				id = n.ID()
+			}
+
+		case "last":
+			if n := Last(keg.Path); n != nil {
+				id = n.ID()
+			}
+
+		default:
+			_, err := strconv.Atoi(id)
+
+			if err != nil {
+
+				dex, err := ReadDex(keg.Path)
+				if err != nil {
+					return err
+				}
+
+				pre, err := x.Caller.Get(`regxpre`)
+				if err != nil {
+					return err
+				}
+				if pre == "" {
+					pre = `(?i)`
+				}
+
+				re, err := regexp.Compile(pre + args[0])
+				if err != nil {
+					return err
+				}
+
+				choice := dex.ChooseWithTitleTextExp(re)
+				if choice == nil {
+					return fmt.Errorf("unable to choose a title")
+				}
+
+				id = strconv.Itoa(choice.N)
+			}
+		}
+
+		path := filepath.Join(keg.Path, id, `README.md`)
+
+		if !fs.Exists(path) {
+			return fmt.Errorf("content node (%s) does not exist in %q", id, keg.Name)
+		}
+
+		buf, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		var r *glamour.TermRenderer
+		if !term.IsInteractive() {
+			r, err = glamour.NewTermRenderer(
+				glamour.WithWordWrap(-1),
+				glamour.WithStylesFromJSONBytes(notty),
+			)
+			if err != nil {
+				return err
+			}
+			out, err := r.Render(string(buf))
+			if err != nil {
+				return err
+			}
+			fmt.Print(out)
+			return nil
+		}
+
+		glamenv := os.Getenv(`GLAMOUR_STYLE`)
+		if glamenv != "" {
+			r, err = glamour.NewTermRenderer(
+				glamour.WithEnvironmentConfig(),
+				glamour.WithWordWrap(-1),
+			)
+			if err != nil {
+				return err
+			}
+		} else {
+			r, err = glamour.NewTermRenderer(
+				glamour.WithStylesFromJSONBytes(dark),
+				glamour.WithWordWrap(-1),
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		out, err := r.Render(string(buf))
+		if err != nil {
+			return err
+		}
+		Z.Page(out)
+
 		return nil
 	},
 }

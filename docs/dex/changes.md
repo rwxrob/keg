@@ -1,6 +1,5 @@
-* 2022-12-04 00:23:48Z [More reason to use commands over functions and aliases](../14)
+* 2022-12-04 05:23:48Z [More reason to use commands over functions and aliases](../14)
 * 2022-12-02 07:06:20Z [Add default columns when cannot be determined](../13)
-* 2022-12-02 03:44:42Z [Planned additions](../10)
 * 2022-12-02 02:44:05Z [Q: How do I disable case-insensitive matching?](../11)
 * 2022-11-30 04:35:46Z [Sample content node](../9)
 * 2022-11-27 06:36:10Z [Let's start a keg](../5)

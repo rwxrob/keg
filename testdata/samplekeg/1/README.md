@@ -1,6 +1,6 @@
 # Sample content node
 
-Hello KEG friend! For full reference try KEG Quick Start Guide[^start] or official KEG Specification[^spec].
+Hello KEG friend! For full reference try KEG Quick Start Guide[^start] or official KEG Specification[^spec]. If you already know some form of Markdown this sample summary should be enough to help you understand KEGML constraints to regular Markdown for the sake of simplicity, clarity, and efficiency.
 
 |Block          | Token            | Contains
 |              -|-                 |   -
@@ -21,7 +21,6 @@ Hello KEG friend! For full reference try KEG Quick Start Guide[^start] or offici
 * Title must be first line and not exceed 72 total runes[^unicode]
 * Footnotes must be the last block
 * Lists must never follow other Lists of any type
-* Math must never follow another Math block
 * Separator must never follow another Separator block
 
 |  Span       | Tokens    | Description                               |
@@ -31,13 +30,12 @@ Hello KEG friend! For full reference try KEG Quick Start Guide[^start] or offici
 | Lede        | `***`     | Introductory, summarize, provoke, entice  |
 | Math        | `$`       | Inline MathJax/LaTeX markup notation      |
 | Code        | `` ` ``   | Code, monospace, preformatted             |
-| Code        | `` `` ``  | (same as Code, but allows backtick)       |
 | URL         | `<` `>`   | Universal resource locator                |
 | Plain       | (none)    | Anything not in another span type         |
 
 * Lede must be first (and possibly only) span in paragraph block
 
-***There are only three types of links: node, file, and foot.*** Node links target another nodes including indexes[^dexnode]. Both can have a **query code** that begins with question mark (`?`).
+***There are three types of links: node, file, and footnote.*** Node links target another nodes including index nodes[^dexnode]. Both node and file nodes can have a **query code** that begins with question mark (`?`) and specifies how to include and expand the linked node or file.
 
 |Query Code | Behavior
 |          -|-

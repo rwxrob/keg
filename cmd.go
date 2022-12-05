@@ -625,17 +625,18 @@ var editCmd = &Z.Cmd{
 		}
 
 		id := args[0]
+		var entry *DexEntry
 
 		switch id {
 
 		case "same":
-			if n := LastChanged(keg.Path); n != nil {
-				id = n.ID()
+			if entry = LastChanged(keg.Path); entry != nil {
+				id = entry.ID()
 			}
 
 		case "last":
-			if n := Last(keg.Path); n != nil {
-				id = n.ID()
+			if entry = Last(keg.Path); entry != nil {
+				id = entry.ID()
 			}
 
 		default:
@@ -661,12 +662,12 @@ var editCmd = &Z.Cmd{
 					return err
 				}
 
-				choice := dex.ChooseWithTitleTextExp(re)
-				if choice == nil {
+				entry = dex.ChooseWithTitleTextExp(re)
+				if entry == nil {
 					return fmt.Errorf("unable to choose a title")
 				}
 
-				id = strconv.Itoa(choice.N)
+				id = strconv.Itoa(entry.N)
 			}
 		}
 
@@ -676,6 +677,8 @@ var editCmd = &Z.Cmd{
 			return fmt.Errorf("content node (%s) does not exist in %q", id, keg.Name)
 		}
 
+		btime := fs.ModTime(path)
+
 		if err := file.Edit(path); err != nil {
 			return err
 		}
@@ -684,11 +687,18 @@ var editCmd = &Z.Cmd{
 			if err = os.RemoveAll(filepath.Dir(path)); err != nil {
 				return err
 			}
+			if err := DexRemove(keg.Path, entry); err != nil {
+				return err
+			}
+		} else {
+			if err := DexUpdate(keg.Path, entry); err != nil {
+				return err
+			}
 		}
 
-		// FIXME: shouldn't make the entire dex every time
-		if err := MakeDex(keg.Path); err != nil {
-			return err
+		atime := fs.ModTime(path)
+		if !atime.After(btime) {
+			return nil
 		}
 
 		return Publish(keg.Path)

@@ -102,7 +102,9 @@ func ScanDex(kegdir string) (*Dex, error) {
 // locking is attempted using the go-internal/lockedfile (used by Go
 // itself). Both a friendly markdown file reverse sorted by time of last
 // update (changes.md) and a tab-delimited file sorted numerically by
-// node ID (nodes.tsv) are created.
+// node ID (nodes.tsv) are created. Any empty content node directory is
+// automatically removed. Empty is defined to be one that only
+// contains 0-length files, recursively.
 func MakeDex(kegdir string) error {
 	_dex, err := ScanDex(kegdir)
 	if err != nil {
@@ -287,8 +289,8 @@ func Edit(kegpath string, id int) error {
 // dex/changes.md file and if found loads it, if not, MakeDex is called
 // to create it. Then DexUpdate examines the Dex for the DexEntry passed
 // and if found updates it with the new information, otherwise, it will
-// add the new entry without any further validation. The updated Dex is
-// then written to the dex/changes.md file.
+// add the new entry without any further validation and call WriteDex
+// create the dex files and update keg file.
 func DexUpdate(kegpath string, entry *DexEntry) error {
 
 	if !HaveDex(kegpath) {
@@ -398,8 +400,8 @@ func ImportNode(kegpath, target string) error {
 	return DexUpdate(kegpath, next)
 }
 
-// DexRemove removes an entry from the dex/changes.md and
-// dex/nodes.tsv files without doing a full ScanDex.
+// DexRemove removes an entry without changing the current sort order of
+// dex/changes.md and calls WriteDex without a ScanDex.
 func DexRemove(kegpath string, entry *DexEntry) error {
 
 	dex, err := ReadDex(kegpath)

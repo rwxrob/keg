@@ -368,3 +368,22 @@ func (d Dex) Random() *DexEntry {
 	i := rand.Intn(len(d))
 	return d[i]
 }
+
+// Delete removes the specified entry shrinking the slice without
+// changing the underlying size of the supporting array while
+// maintaining references to each DexEntry. Note that the persisted
+// content node directory may still exist. This method only affects the
+// Dex itself. Stops at first match.
+func (d *Dex) Delete(entry *DexEntry) {
+	var index int
+	for i, it := range *d {
+		if it == entry || it.N == entry.N {
+			index = i
+			break
+		}
+	}
+	for i := index; i < len(*d)-1; i++ {
+		(*d)[i] = (*d)[i+1]
+	}
+	(*d) = (*d)[:len(*d)-1]
+}

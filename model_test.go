@@ -87,3 +87,15 @@ func ExampleDexEntry_Pretty() {
 	// "\x1b[30m0001-01-01 00:00Z \x1b[32m0 \x1b[37mSo\x1b[31mm\x1b[37me\x1b[0m\n"
 
 }
+
+func ExampleDex_Delete() {
+	one := &keg.DexEntry{N: 1, T: `One`}
+	two := &keg.DexEntry{N: 2, T: `Two`}
+	three := &keg.DexEntry{N: 3, T: `Three`}
+	dex := &keg.Dex{one, two, three}
+	dex.Delete(two)
+	fmt.Println(dex.MD())
+	// Output:
+	// * 0001-01-01 00:00:00Z [One](../1)
+	// * 0001-01-01 00:00:00Z [Three](../3)
+}

@@ -397,3 +397,17 @@ func ImportNode(kegpath, target string) error {
 
 	return DexUpdate(kegpath, next)
 }
+
+// DexRemove removes an entry from the dex/changes.md and
+// dex/nodes.tsv files without doing a full ScanDex.
+func DexRemove(kegpath string, entry *DexEntry) error {
+
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return err
+	}
+
+	dex.Delete(entry)
+
+	return WriteDex(kegpath, dex)
+}

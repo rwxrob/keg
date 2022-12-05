@@ -600,8 +600,8 @@ var editCmd = &Z.Cmd{
 		The {{aka}} command opens a content node README.md file for editing.
 		It is the default command when no other arguments match other
 		commands. Nodes can be identified by integer ID, TITLEWORD contained
-		in the title, or the special {{pre "last"}} (last created) or {{pre
-		"same"}} (last updated) parameters.
+		in the title, or the special {{pre "last"}} (last created) or 
+		{{pre "same"}} (last updated) parameters.
 
 		For TITLEWORD if more than one match is found the user is prompted
 		to choose between them. Otherwise, the match is opened in the
@@ -903,7 +903,7 @@ var grepCmd = &Z.Cmd{
 
 	Description: `
 		The {{aka}} performs a simple regular expression grep of all node
-		README.md files. (Does not depend on host {{pre grep}} command. By
+		README.md files. (Does not depend on host {{pre "grep"}} command. By
 		default, all regular expressions are case-sensitive (unlike default
 		{{cmd "title"}} or {{cmd "edit"}} commands).  This can be
 		explicitly overridden for a given search by adding {{pre "(?i)"}} or

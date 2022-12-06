@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/charmbracelet/glamour"
 	Z "github.com/rwxrob/bonzai/z"
@@ -103,7 +104,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
 		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
-		importCmd, grepCmd, viewCmd,
+		importCmd, grepCmd, viewCmd, columnsCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -856,6 +857,50 @@ var importCmd = &Z.Cmd{
 	},
 }
 
+// columns first looks for term.WinSize.Col to have been set. If not
+// found, the columns variable (from vars) is checked and used if found.
+// Finally, the package global DefColumns will be used.
+func columns(x *Z.Cmd) int {
+
+	col := int(term.WinSize.Col) // only > 0 for interactive terminals
+	if col > 0 {
+		return col
+	}
+
+	colstr, err := x.Caller.Get(`columns`)
+	if err == nil && colstr != "" {
+		col, err = strconv.Atoi(colstr)
+		if err == nil {
+			return col
+		}
+	}
+
+	return DefColumns
+
+}
+
+var columnsCmd = &Z.Cmd{
+	Name:     `columns`,
+	Usage:    `(help|col|cols)`,
+	MaxArgs:  1,
+	Summary:  `print the number of columns resolved`,
+	Commands: []*Z.Cmd{help.Cmd},
+	Dynamic:  template.FuncMap{`columns`: func() int { return DefColumns }},
+
+	Description: `
+		The {{aka}} command first looks for term.WinSize.Col which is set by
+		many UNIX-like operating systems. If not found, the columns variable
+		(from vars) is checked and used if found. Finally, the default
+		hard-coded value ({{columns}}) is used.
+
+`,
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		term.Print(columns(x))
+		return nil
+	},
+}
+
 type grepChoice struct {
 	hit grep.Result
 	str string
@@ -908,28 +953,7 @@ var grepCmd = &Z.Cmd{
 			dpaths = append(dpaths, filepath.Join(d.Path, `README.md`))
 		}
 
-		// figure out columns (yes it's complicated)
-		col := int(term.WinSize.Col) // only > 0 for interactive terminals
-		if col <= 0 {
-
-			colstr, err := x.Caller.Get(`columns`)
-			if err != nil {
-				return err
-			}
-
-			if colstr != "" {
-				col, err = strconv.Atoi(colstr)
-				if err != nil {
-					return err
-				}
-			}
-
-			if col <= 0 {
-				col = DefColumns
-			}
-		}
-
-		col -= 14
+		col := columns(x) - 14
 		results, err := grep.This(args[0], col, dpaths...)
 		if err != nil {
 			return err

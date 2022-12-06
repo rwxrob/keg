@@ -88,7 +88,7 @@ func current(x *Z.Cmd) (*Local, error) {
 	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
-//go:embed help.md
+//go:embed descriptions/help.md
 var helpDoc string
 
 var Cmd = &Z.Cmd{
@@ -119,7 +119,7 @@ var Cmd = &Z.Cmd{
 	},
 }
 
-//go:embed current.md
+//go:embed descriptions/current.md
 var currentDoc string
 
 var currentCmd = &Z.Cmd{
@@ -141,7 +141,7 @@ var currentCmd = &Z.Cmd{
 	},
 }
 
-//go:embed titles.md
+//go:embed descriptions/titles.md
 var titlesDoc string
 
 var titlesCmd = &Z.Cmd{
@@ -220,7 +220,7 @@ var directoryCmd = &Z.Cmd{
 	},
 }
 
-//go:embed delete.md
+//go:embed descriptions/delete.md
 var deleteDoc string
 
 var deleteCmd = &Z.Cmd{
@@ -290,7 +290,7 @@ var deleteCmd = &Z.Cmd{
 	},
 }
 
-//go:embed indexdoc.md
+//go:embed descriptions/indexdoc.md
 var indexDoc string
 
 var indexCmd = &Z.Cmd{
@@ -301,7 +301,7 @@ var indexCmd = &Z.Cmd{
 	Description: indexDoc,
 }
 
-//go:embed dexupdate.md
+//go:embed descriptions/dexupdate.md
 var dexUpdateDoc string
 
 var dexUpdateCmd = &Z.Cmd{
@@ -318,7 +318,7 @@ var dexUpdateCmd = &Z.Cmd{
 	},
 }
 
-//go:embed last.md
+//go:embed descriptions/last.md
 var lastDoc string
 
 var lastCmd = &Z.Cmd{
@@ -362,7 +362,7 @@ var lastCmd = &Z.Cmd{
 	},
 }
 
-//go:embed changescmd.md
+//go:embed descriptions/changescmd.md
 var changesDoc string
 
 var ChangesDefault = 5
@@ -442,7 +442,7 @@ var DefaultInfoFile string
 //go:embed testdata/samplekeg/0/README.md
 var DefaultZeroNode string
 
-//go:embed init.md
+//go:embed descriptions/init.md
 var initDoc string
 
 var initCmd = &Z.Cmd{
@@ -482,7 +482,7 @@ var initCmd = &Z.Cmd{
 	},
 }
 
-//go:embed edit.md
+//go:embed descriptions/edit.md
 var editDoc string
 
 var editCmd = &Z.Cmd{
@@ -641,7 +641,7 @@ var createCmd = &Z.Cmd{
 	},
 }
 
-//go:embed random.md
+//go:embed descriptions/random.md
 var randomDoc string
 
 var randomCmd = &Z.Cmd{
@@ -678,7 +678,7 @@ var randomCmd = &Z.Cmd{
 	},
 }
 
-//go:embed import.md
+//go:embed descriptions/import.md
 var importDoc string
 
 var importCmd = &Z.Cmd{
@@ -738,7 +738,7 @@ func columns(x *Z.Cmd) int {
 
 }
 
-//go:embed columns.md
+//go:embed descriptions/columns.md
 var columnsDoc string
 
 var columnsCmd = &Z.Cmd{
@@ -763,7 +763,7 @@ type grepChoice struct {
 
 func (c grepChoice) String() string { return c.str }
 
-//go:embed grep.md
+//go:embed descriptions/grep.md
 var grepDoc string
 
 var grepCmd = &Z.Cmd{
@@ -859,7 +859,7 @@ var dark []byte
 //go:embed testdata/keg-notty.json
 var notty []byte
 
-//go:embed view.md
+//go:embed descriptions/view.md
 var viewDoc string
 
 var viewCmd = &Z.Cmd{

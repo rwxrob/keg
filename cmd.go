@@ -15,6 +15,7 @@ import (
 
 	"github.com/charmbracelet/glamour"
 	Z "github.com/rwxrob/bonzai/z"
+	"github.com/rwxrob/choose"
 	"github.com/rwxrob/conf"
 	"github.com/rwxrob/fs"
 	"github.com/rwxrob/fs/dir"
@@ -640,14 +641,17 @@ var editCmd = &Z.Cmd{
 			}
 
 		default:
-			_, err := strconv.Atoi(id)
 
+			dex, err := ReadDex(keg.Path)
 			if err != nil {
+				return err
+			}
 
-				dex, err := ReadDex(keg.Path)
-				if err != nil {
-					return err
-				}
+			idn, err := strconv.Atoi(id)
+
+			if err == nil {
+				entry = dex.Lookup(idn)
+			} else {
 
 				pre, err := x.Caller.Get(`regxpre`)
 				if err != nil {
@@ -852,6 +856,13 @@ var importCmd = &Z.Cmd{
 	},
 }
 
+type grepChoice struct {
+	hit grep.Result
+	str string
+}
+
+func (c grepChoice) String() string { return c.str }
+
 var grepCmd = &Z.Cmd{
 	Name:     `grep`,
 	Usage:    `(help|REGEXP)`,
@@ -916,6 +927,8 @@ var grepCmd = &Z.Cmd{
 		}
 
 		if term.IsInteractive() {
+
+			var choices []grepChoice
 			for _, hit := range results.Hits {
 				id := filepath.Base(filepath.Dir(hit.File))
 				match := to.CrunchSpaceVisible(hit.Text[hit.TextBeg:hit.TextEnd])
@@ -937,7 +950,18 @@ var grepCmd = &Z.Cmd{
 					}
 				}
 				out := before + term.Red + match + term.X + after
-				fmt.Printf("%v%6v%v %v\n", term.Green, id, term.X, out)
+				choices = append(choices, grepChoice{
+					hit: hit,
+					str: fmt.Sprintf("%v%6v%v %v", term.Green, id, term.X, out),
+				})
+			}
+			i, c, err := choose.From(choices)
+			if err != nil {
+				return err
+			}
+			if i > 0 {
+				id := filepath.Base(filepath.Dir(c.hit.File))
+				return editCmd.Call(x, id)
 			}
 			return nil
 		}

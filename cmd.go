@@ -101,7 +101,7 @@ var Cmd = &Z.Cmd{
 	Commands: []*Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
-		lastCmd, changesCmd, titleCmd, initCmd, randomCmd,
+		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
 		importCmd, grepCmd, viewCmd,
 	},
 
@@ -250,7 +250,7 @@ var currentCmd = &Z.Cmd{
 	},
 }
 
-var titleCmd = &Z.Cmd{
+var titlesCmd = &Z.Cmd{
 	Name:    `titles`,
 	Aliases: []string{`title`},
 	Usage:   `(help|REGEXP)`,
@@ -616,7 +616,7 @@ var editCmd = &Z.Cmd{
 		}
 
 		if !term.IsInteractive() {
-			return titleCmd.Call(x, args...)
+			return titlesCmd.Call(x, args...)
 		}
 
 		keg, err := current(x.Caller)

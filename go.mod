@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/charmbracelet/glamour v0.6.0
-	github.com/rwxrob/bonzai v0.20.5
+	github.com/rwxrob/bonzai v0.20.7
 	github.com/rwxrob/choose v0.2.1
 	github.com/rwxrob/conf v0.8.2
 	github.com/rwxrob/fs v0.18.0
@@ -14,7 +14,7 @@ require (
 	github.com/rwxrob/pegn v0.2.1
 	github.com/rwxrob/term v0.2.9
 	github.com/rwxrob/to v0.12.1
-	github.com/rwxrob/vars v0.5.0
+	github.com/rwxrob/vars v0.6.1
 )
 
 require (
@@ -45,15 +45,15 @@ require (
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/rwxrob/compcmd v0.3.0 // indirect
 	github.com/rwxrob/compfile v0.1.12 // indirect
-	github.com/rwxrob/fn v0.3.3 // indirect
+	github.com/rwxrob/fn v0.4.0 // indirect
 	github.com/rwxrob/structs v0.6.0 // indirect
 	github.com/rwxrob/yq v0.3.2 // indirect
 	github.com/yuin/goldmark v1.5.3 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/net v0.3.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.2.0 // indirect
+	golang.org/x/term v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect

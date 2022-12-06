@@ -88,21 +88,26 @@ func current(x *Z.Cmd) (*Local, error) {
 	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
+//go:embed help.md
+var helpDoc string
+
 var Cmd = &Z.Cmd{
-	Name:      `keg`,
-	Aliases:   []string{`kn`},
-	Summary:   `create and manage knowledge exchange graphs`,
-	Version:   `v0.8.0`,
-	UseVars:   true,
-	Copyright: `Copyright 2022 Robert S Muhlestein`,
-	License:   `Apache-2.0`,
-	Site:      `rwxrob.tv`,
-	Source:    `git@github.com:rwxrob/keg.git`,
-	Issues:    `github.com/rwxrob/keg/issues`,
+	Name:        `keg`,
+	Aliases:     []string{`kn`},
+	Summary:     `create and manage knowledge exchange graphs`,
+	Version:     `v0.8.0`,
+	UseVars:     true,
+	Copyright:   `Copyright 2022 Robert S Muhlestein`,
+	License:     `Apache-2.0`,
+	Site:        `rwxrob.tv`,
+	Source:      `git@github.com:rwxrob/keg.git`,
+	Issues:      `github.com/rwxrob/keg/issues`,
+	ConfVars:    true,
+	Description: helpDoc,
 
 	Commands: []*Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
-		dexCmd, createCmd, currentCmd, dirCmd, deleteCmd,
+		indexCmd, createCmd, currentCmd, directoryCmd, deleteCmd,
 		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
 		importCmd, grepCmd, viewCmd, columnsCmd,
 	},
@@ -112,132 +117,16 @@ var Cmd = &Z.Cmd{
 		`get`:    {`var`, `get`},
 		`sample`: {`create`, `sample`},
 	},
-
-	ConfVars: true,
-
-	Description: `
-		The {{aka}} command is for personal and public knowledge management
-		as a Knowledge Exchange Graph (sometimes called "personal knowledge
-		graph" or "zettelkasten"). Using {{aka}} you can create,
-		update, search, and organize everything that passes through your
-		brain that you may want to recall later, for whatever reason: school,
-		training, team knowledge, or publishing a paper, article, blog, or
-		book.
-
-	`,
-
-	Other: []Z.Section{
-		{`Getting Started`, `
-		
-		The steps to create your first KEG directory are below, but first
-		a little about the structure of this directory, which does not
-		necessarily require this {{aka}} command to create and maintain.
-		
-		A KEG directory (aka "keg") is just a directory containing a
-		{{pre "keg"}} YAML file and a number of directories that have a
-		{{pre "README.md"}} file called **content nodes**. A node directory must
-		have an incrementing integer name as would be used in a database
-		table. A keg usually also has a {{pre "dex"}} directory containing
-		at least two files:
-		
-		1. Latest changes {{pre "dex/changes.md"}}
-		2. All nodes by ID {{pre "dex/nodes.tsv"}}
-		
-		The {{aka}} command keeps these files up to date.
-		
-		A special **zero node** is used by convention as a target for links
-		to nodes that have yet to be created.
-		
-		Okay, here are the specific steps to get started by creating your
-		first keg directory. If you plan on using Git or GitHub hold off on
-		doing anything with git for now.
-		
-		1. Create a directory and change into it
-		2. Run the {{aka}} {{cmd "init"}} command
-		3. Update the YAML file it opens
-		4. Exit your editor
-		5. List contents of directory to see what was created
-		6. Run the {{aka}} {{cmd "create sample"}} command to create your first node
-		7. Read and understand the sample
-		8. Exit your editor
-		9. Check your index with {{aka}} {{cmd "changes"}} or {{aka}} {{cmd "titles"}}
-		10. Repeat 6-9 creating several nodes (optionally omitting {{cmd "sample"}})
-		11. Search titles with the {{aka}} {{cmd "titles"}} command
-		12. Edit node with title keywords with {{aka}} {{cmd "edit WORD"}} command
-		13. Edit node with grep regexp matches with {{aka}} {{cmd "grep WORD"}} command
-		14. Notice that {{aka}} {{cmd "edit"}} is the default (ex: {{aka}} WORD)
-		
-		`,
-		}, {`Git and GitHub`, `
-
-		It's important when using Git that either the remote git repo has
-		been fully created (so that {{cmd "git pull"}} will work) or that
-		{{cmd "git"}} has not been run at all (no {{pre ".git"}} directory).
-		Otherwise, {{aka}} will attempt to pull and fail. These instructions
-		assume the reader understands {{cmd "git"}} and the {{cmd "gh"}}
-		commands.
-		
-		Here are the steps to follow when Git and GitHub are wanted. They
-		are essentially the same as {{pre "Getting Started"}} but include
-		creating a GitHub repo with the {{cmd "gh"}} command afterward.
-		
-		1. Create a directory and change into it
-		2. Run the {{aka}} {{cmd "init"}} command
-		3. Update the YAML file it opens
-		4. Exit your editor
-		5. Create and push as Git repo with {{cmd "gh repo create"}}
-		6. Continue with steps 9+ from Getting Started
-		
-		Alternatively, one can simply create a GitHub repo from the web site
-		and {{cmd "git clone"}} it down to the local machine and then run
-		{{aka}} {{cmd "init"}} from within it.
-
-		`}, {`Learning KEG Markup Language`, `
-		
-		Use the {{aka}} {{cmd "create sample"}} command to automatically create
-		a new content node sample that introduces the KEG Markup Language
-		(KEGML). You can delete it later after reading it. Or, you can use
-		it instead of just {{aka}} {{cmd "create"}} (which gives you a blank) to
-		help you remember how to write KEGML until you get proficient enough
-		not to have to look it up every time.
-		
-		For more about the emerging KEG 2023-01 specification and how to
-		create content that complies for knowledge exchange and publication
-		(while we work more on linting and validation within the
-		{{aka}} command) have a look at https://github.com/rwxrob/keg-spec
-		
-		`},
-	},
 }
 
-var currentCmd = &Z.Cmd{
-	Name:     `current`,
-	Summary:  `show the current keg`,
-	Commands: []*Z.Cmd{help.Cmd},
+//go:embed current.md
+var currentDoc string
 
-	Description: `
-		The {{aka}} command displays the current keg by name, which is
-		resolved as follows:
-		
-		1. The {{pre "KEG_CURRENT"}} environment variable
-		2. The current working directory if {{pre "keg"}} file found
-		2. The {{pre "docs"}} directory in current working if found
-		3. The {{pre "current"}} var setting (see {{cmd "var"}})
-		
-		Note that setting the var forces {{aka}} to always use that
-		setting until it is explicitly changed or temporarily overridden
-		with {{pre "KEG_CURRENT"}} environment variable.
-		
-		      keg()
-		      {
-		        KEG_CURRENT=zet keg "$@"
-		      }
-		
-		It is often useful to have {{pre "current"}} set to the most
-		frequently used keg and then change into the working directory of
-		another, less updated, keg when needed.
-		
-	`,
+var currentCmd = &Z.Cmd{
+	Name:        `current`,
+	Summary:     `show the current keg`,
+	Commands:    []*Z.Cmd{help.Cmd},
+	Description: currentDoc,
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -252,29 +141,17 @@ var currentCmd = &Z.Cmd{
 	},
 }
 
+//go:embed titles.md
+var titlesDoc string
+
 var titlesCmd = &Z.Cmd{
-	Name:    `titles`,
-	Aliases: []string{`title`},
-	Usage:   `(help|REGEXP)`,
-	Summary: `find titles containing regular expression`,
-	UseVars: true,
-
-	Description: `
-		The {{aka}} command returns a paged list of all titles matching the
-		given regular expression. By default all regular expressions
-		({{pre "REGEXP"}}) are made case insensitive by adding the prefix
-		{{pre "(?i)"}} which can be explicitly overridden with {{pre "(?-i)"}} for
-		one search or changed as the default by assigning it to the
-		{{pre "regxpre"}} variable:
-
-		      keg set regxpre '(?-i)'
-
-		Note that if set, {{pre "regxpre"}} applies to *all* searches, which
-		includes the {{cmd "edit"}} and {{cmd "grep"}} commands.
-
-	`,
-
-	Commands: []*Z.Cmd{help.Cmd, vars.Cmd},
+	Name:        `titles`,
+	Aliases:     []string{`title`},
+	Usage:       `(help|REGEXP)`,
+	Summary:     `find titles containing regular expression`,
+	UseVars:     true,
+	Description: titlesDoc,
+	Commands:    []*Z.Cmd{help.Cmd, vars.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -316,9 +193,9 @@ var titlesCmd = &Z.Cmd{
 	},
 }
 
-var dirCmd = &Z.Cmd{
-	Name:     `dir`,
-	Aliases:  []string{`d`},
+var directoryCmd = &Z.Cmd{
+	Name:     `directory`,
+	Aliases:  []string{`d`, `dir`},
 	MaxArgs:  1,
 	Summary:  `print path to directory of current keg or node`,
 	Commands: []*Z.Cmd{help.Cmd},
@@ -343,13 +220,17 @@ var dirCmd = &Z.Cmd{
 	},
 }
 
+//go:embed delete.md
+var deleteDoc string
+
 var deleteCmd = &Z.Cmd{
-	Name:     `delete`,
-	Summary:  `delete node from current keg`,
-	MinArgs:  1,
-	Aliases:  []string{`del`, `rm`},
-	Usage:    `(help|INTEGER_NODE_ID|last|same)`,
-	Commands: []*Z.Cmd{help.Cmd},
+	Name:        `delete`,
+	Summary:     `delete node from current keg`,
+	MinArgs:     1,
+	Aliases:     []string{`del`, `rm`},
+	Usage:       `(help|INTEGER_NODE_ID|last|same)`,
+	Description: deleteDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -409,51 +290,45 @@ var deleteCmd = &Z.Cmd{
 	},
 }
 
-var dexCmd = &Z.Cmd{
-	Name:     `dex`,
-	Commands: []*Z.Cmd{help.Cmd, dexUpdateCmd},
-	Summary:  `work with indexes`,
+//go:embed indexdoc.md
+var indexDoc string
+
+var indexCmd = &Z.Cmd{
+	Name:        `index`,
+	Aliases:     []string{`dex`},
+	Commands:    []*Z.Cmd{help.Cmd, dexUpdateCmd},
+	Summary:     `work with indexes`,
+	Description: indexDoc,
 }
 
-var dexUpdateCmd = &Z.Cmd{
-	Name:     `update`,
-	Commands: []*Z.Cmd{help.Cmd},
-	Summary:  `update dex/changes.md and dex/nodes.tsv`,
-	Call: func(x *Z.Cmd, args ...string) error {
+//go:embed dexupdate.md
+var dexUpdateDoc string
 
+var dexUpdateCmd = &Z.Cmd{
+	Name:        `update`,
+	Commands:    []*Z.Cmd{help.Cmd},
+	Summary:     `update dex/changes.md and dex/nodes.tsv`,
+	Description: dexUpdateDoc,
+	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller.Caller) // keg dex update
 		if err != nil {
 			return err
 		}
-
 		return MakeDex(keg.Path)
 	},
 }
 
+//go:embed last.md
+var lastDoc string
+
 var lastCmd = &Z.Cmd{
-	Name:     `last`,
-	Usage:    `[help|dir|id|title|time]`,
-	Params:   []string{`dir`, `id`, `title`, `time`},
-	MaxArgs:  1,
-	Summary:  `show last created node`,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command shows information about the last content node
-		that was created, which is assumed to be the one with the highest
-		integer identifier within the current keg directory. By default the
-		colorized form is displayed to interactive terminals and a KEGML
-		include link when non-interactive (assuming !! from vim, for example).
-
-		* {{pre "dir"}} shows only the full directory path
-		* {{pre "id"}} shows only the node ID
-		* {{pre "title"}} shows only the title
-		* {{pre "time"}} shows only the time of last change
-
-		Note that this is different than the latest {{cmd "changes"}} command.
-
-	`,
-
+	Name:        `last`,
+	Usage:       `[help|dir|id|title|time]`,
+	Params:      []string{`dir`, `id`, `title`, `time`},
+	MaxArgs:     1,
+	Summary:     `show last created node`,
+	Description: lastDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 	Call: func(x *Z.Cmd, args ...string) error {
 
 		keg, err := current(x.Caller)
@@ -498,7 +373,11 @@ var changesCmd = &Z.Cmd{
 	Usage:       `[help|COUNT|default|set default COUNT]`,
 	Summary:     `show most recent n nodes changed`,
 	UseVars:     true,
+	Description: changesDoc,
 	Commands:    []*Z.Cmd{help.Cmd, vars.Cmd},
+	Dynamic: template.FuncMap{
+		`changesdef`: func() int { return ChangesDefault },
+	},
 
 	Shortcuts: Z.ArgMap{
 		`default`: {`var`, `get`, `default`},
@@ -563,27 +442,15 @@ var DefaultInfoFile string
 //go:embed testdata/samplekeg/0/README.md
 var DefaultZeroNode string
 
+//go:embed init.md
+var initDoc string
+
 var initCmd = &Z.Cmd{
-	Name:     `init`,
-	Usage:    `[help]`,
-	Summary:  `initialize current working dir as new keg`,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command creates a {{pre "keg"}} YAML file in the
-		current working directory and opens it up for editing.
-
-		{{aka}} also creates a **zero node** (/0) typically used for
-		linking to planned content from other content nodes.
-
-		Finally, {{aka}} creates the {{pre "dex/changes.md"}} and
-		{{pre "dex/nodes.tsv"}} index files and updates the {{pre "keg"}} file
-		{{pre "updated"}} field to match the latest update (effectively the
-		same as calling {{cmd "dex update"}}).
-
-		Also see the *Getting Started* docs in the main {{cmd "help"}} command.
-
-	`,
+	Name:        `init`,
+	Usage:       `[help]`,
+	Summary:     `initialize current working dir as new keg`,
+	Description: initDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(_ *Z.Cmd, _ ...string) error {
 
@@ -615,26 +482,17 @@ var initCmd = &Z.Cmd{
 	},
 }
 
+//go:embed edit.md
+var editDoc string
+
 var editCmd = &Z.Cmd{
-	Name:     `edit`,
-	Aliases:  []string{`e`},
-	Params:   []string{`last`, `same`},
-	Usage:    `(help|ID|last|same|TITLEWORD)`,
-	Summary:  `choose and edit a specific node (default)`,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command opens a content node README.md file for editing.
-		It is the default command when no other arguments match other
-		commands. Nodes can be identified by integer ID, TITLEWORD contained
-		in the title, or the special {{pre "last"}} (last created) or 
-		{{pre "same"}} (last updated) parameters.
-
-		For TITLEWORD if more than one match is found the user is prompted
-		to choose between them. Otherwise, the match is opened in the
-		EDITOR. See rwxrob/fs.file.Edit for more about how editor is resolved.
-
-	`,
+	Name:        `edit`,
+	Aliases:     []string{`e`},
+	Params:      []string{`last`, `same`},
+	Usage:       `(help|ID|last|same|TITLEWORD)`,
+	Summary:     `choose and edit a specific node (default)`,
+	Description: editDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -783,29 +641,18 @@ var createCmd = &Z.Cmd{
 	},
 }
 
+//go:embed random.md
+var randomDoc string
+
 var randomCmd = &Z.Cmd{
-	Name:     `random`,
-	Aliases:  []string{`rand`},
-	Usage:    `[help|title|id|dir|edit]`,
-	Params:   []string{`title`, `id`, `dir`, `edit`},
-	MaxArgs:  1,
-	Summary:  `return random node, gamify content editing`,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command randomizes the selection of a single node and
-		returns the title, id, or directory; or opens the editor on a random
-		node.
-
-		One of the core tenets of the Zettelkasten approach is regularly and
-		randomly reviewing the knowledge that is stored in it to bring it to
-		the forefront of your mind so that it can inspire new ideas. Looking
-		at a random content node is one way to accomplish this and break
-		writers block by giving you something random to focus on to get you
-		started.
-
-    Defaults to {{pre "edit"}} if no argument given.
-	`,
+	Name:        `random`,
+	Aliases:     []string{`rand`},
+	Usage:       `[help|title|id|dir|edit]`,
+	Params:      []string{`title`, `id`, `dir`, `edit`},
+	MaxArgs:     1,
+	Summary:     `return random node, gamify content editing`,
+	Description: randomDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 		if len(args) == 0 {
@@ -831,28 +678,15 @@ var randomCmd = &Z.Cmd{
 	},
 }
 
+//go:embed import.md
+var importDoc string
+
 var importCmd = &Z.Cmd{
-	Name:     `import`,
-	Usage:    `[help|(DIR|NODEDIR)...]`,
-	Summary:  `import nodes into current keg`,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command imports a specific NODEDIR or all the apparent
-		node directories within DIR into the current node. If no argument is
-		passed, imports the current working directory into the current keg.
-		If any of the arguments end in an integer they are assumed to be
-		node directories. Arguments without a base integer are assumed to be
-		directories containing node directories with integer identifiers.
-
-		This command is useful when indirectly migrating nodes from one keg
-		into another by way of an intermediary directory (like {{pre "tmp"}})
-
-		Currently, there is no resolution of links within any of the
-		imported nodes. Each node to be imported should be checked
-		individually to ensure that any dependencies are met or adjusted.
-
-	`,
+	Name:        `import`,
+	Usage:       `[help|(DIR|NODEDIR)...]`,
+	Summary:     `import nodes into current keg`,
+	Description: importDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -904,21 +738,17 @@ func columns(x *Z.Cmd) int {
 
 }
 
+//go:embed columns.md
+var columnsDoc string
+
 var columnsCmd = &Z.Cmd{
-	Name:     `columns`,
-	Usage:    `(help|col|cols)`,
-	MaxArgs:  1,
-	Summary:  `print the number of columns resolved`,
-	Commands: []*Z.Cmd{help.Cmd},
-	Dynamic:  template.FuncMap{`columns`: func() int { return DefColumns }},
-
-	Description: `
-		The {{aka}} command first looks for term.WinSize.Col which is set by
-		many UNIX-like operating systems. If not found, the columns variable
-		(from vars) is checked and used if found. Finally, the default
-		hard-coded value ({{columns}}) is used.
-
-`,
+	Name:        `columns`,
+	Usage:       `(help|col|cols)`,
+	MaxArgs:     1,
+	Summary:     `print the number of columns resolved`,
+	Description: columnsDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
+	Dynamic:     template.FuncMap{`columns`: func() int { return DefColumns }},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 		term.Print(columns(x))
@@ -933,37 +763,16 @@ type grepChoice struct {
 
 func (c grepChoice) String() string { return c.str }
 
-var grepCmd = &Z.Cmd{
-	Name:     `grep`,
-	Usage:    `(help|REGEXP)`,
-	MinArgs:  1,
-	Summary:  `grep regular expression out of all nodes`,
-	Commands: []*Z.Cmd{help.Cmd},
+//go:embed grep.md
+var grepDoc string
 
-	Description: `
-		The {{aka}} command performs a simple regular expression search of
-		all node README.md files. It does not depend on any {{pre "grep"}}
-		command being installed.
-		
-		By default, all regular expressions are case-sensitive (unlike
-		default {{cmd "title"}} or {{cmd "edit"}} commands). This can be
-		explicitly overridden for a given search by adding {{pre "(?i)"}} or
-		for all searches by setting the global {{pre "regxpre"}} variable to
-		the same:
-		
-		      keg grep set regxpre '(?i)'
-		
-		Note that if set, {{pre "regxpre"}} applies to *all* searches, which
-		includes the {{cmd "titles"}} and {{cmd "edit"}} commands.
-		
-		When run interactively the choice of hits is presented so that the
-		user may select. The selection is then delegated to the {{cmd
-		"edit"}} command.
-		
-		When run non-interactively the matching files are listed with their
-		titles as a node include list.
-		
-		`,
+var grepCmd = &Z.Cmd{
+	Name:        `grep`,
+	Usage:       `(help|REGEXP)`,
+	MinArgs:     1,
+	Summary:     `grep regular expression out of all nodes`,
+	Description: grepDoc,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -1050,37 +859,17 @@ var dark []byte
 //go:embed testdata/keg-notty.json
 var notty []byte
 
+//go:embed view.md
+var viewDoc string
+
 var viewCmd = &Z.Cmd{
-	Name:     `view`,
-	Summary:  `view a specific node`,
-	Usage:    `(help|ID|REGEXP)`,
-	Params:   []string{`last`, `same`},
-	MinArgs:  1,
-	Commands: []*Z.Cmd{help.Cmd},
-
-	Description: `
-		The {{aka}} command renders a specific node for viewing in the
-		terminal suitable for being cutting and pasting into other text
-		documents and description fields. The argument passed may be an
-		integer ID or a regular expression to be matched in the title text
-		(as with {{cmd "edit"}} and {{cmd "title"}} commands. When matting
-		a REGEXP case insensitive matching is assumed (prefix {{pre "(?i)"}}
-		is added. (See {{cmd "grep"}} for how this default an be changed.)
-
-		The {{aka}} command uses the https://github.com/charmbracelet/glamour
-		package for rendering markdown directly to the terminal and
-		therefore can be customized by setting the GLAMOUR_STYLE environment
-		variable for those who wish. Since the popular GitHub command line
-		utility uses this as well the same customization can be applied to
-		both {{cmd "keg"}} and {{cmd "gh"}}.  By default, a variation on the
-		{{pre "dark"}} style is used with line wrapping and margins disabled
-		(for better cutting and pasting). To get a full copy of the style
-		JSON used see the {{cmd "style"}} command.
-
-		If the output is not to a terminal then the {{pre "notty"}} Glamour
-		theme is used automatically.
-		
-	`,
+	Name:        `view`,
+	Summary:     `view a specific node`,
+	Usage:       `(help|ID|REGEXP)`,
+	Description: viewDoc,
+	Params:      []string{`last`, `same`},
+	MinArgs:     1,
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 

@@ -359,20 +359,39 @@ var deleteCmd = &Z.Cmd{
 		}
 
 		id := args[0]
-		if id == "same" {
-			if n := LastChanged(keg.Path); n != nil {
-				id = n.ID()
-			}
-		}
+		var entry *DexEntry
 
-		if id == "last" {
-			if n := Last(keg.Path); n != nil {
-				id = n.ID()
-			}
-		}
+		switch {
 
-		if _, err = strconv.Atoi(id); err != nil {
-			return x.UsageError()
+		case id == "same":
+
+			if entry = LastChanged(keg.Path); entry != nil {
+				id = entry.ID()
+			}
+
+		case id == "last":
+
+			if entry = Last(keg.Path); entry != nil {
+				id = entry.ID()
+			}
+
+		default:
+
+			var idn int
+			if idn, err = strconv.Atoi(id); err != nil {
+				return x.UsageError()
+			}
+
+			dex, err := ReadDex(keg.Path)
+			if err != nil {
+				return err
+			}
+
+			entry = dex.Lookup(idn)
+			if entry == nil {
+				return fmt.Errorf("node not found: %v", idn)
+			}
+			id = entry.ID()
 		}
 
 		dir := filepath.Join(keg.Path, id)
@@ -382,11 +401,11 @@ var deleteCmd = &Z.Cmd{
 			return err
 		}
 
-		if err := MakeDex(keg.Path); err != nil {
+		if err := DexRemove(keg.Path, entry); err != nil {
 			return err
 		}
-
 		return Publish(keg.Path)
+
 	},
 }
 

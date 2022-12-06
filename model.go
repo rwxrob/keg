@@ -254,8 +254,7 @@ func (d Dex) PrettyLines() []string {
 			text = before + term.Red + hilight + term.White + after
 		}
 		lines = append(lines, fmt.Sprintf(
-			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
-			term.Black, e.U.Format(`2006-01-02 15:04Z`),
+			"%v%-"+strconv.Itoa(nwidth)+"v %v%v%v",
 			term.Green, e.N,
 			term.White, text,
 			term.Reset,

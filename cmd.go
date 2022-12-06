@@ -690,6 +690,7 @@ var editCmd = &Z.Cmd{
 			if err := DexRemove(keg.Path, entry); err != nil {
 				return err
 			}
+			return Publish(keg.Path)
 		} else {
 			if err := DexUpdate(keg.Path, entry); err != nil {
 				return err

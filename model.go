@@ -217,7 +217,7 @@ func (d Dex) LastChangedIdString() string { return strconv.Itoa(d.LastChanged().
 // LastChangedIdWidth returns width of Last integer identifier.
 func (d Dex) LastChangedIdWidth() int { return len(d.LastChangedIdString()) }
 
-// Pretty returns a string with pretty color string with time stamps
+// Pretty returns a string with pretty color string with no time stamps
 // rendered in more readable way.
 func (d Dex) Pretty() string {
 	var str string
@@ -231,8 +231,7 @@ func (d Dex) Pretty() string {
 			text = before + term.Red + hilight + term.White + after
 		}
 		str += fmt.Sprintf(
-			"%v%v %v%-"+strconv.Itoa(nwidth)+"v %v%v%v\n",
-			term.Black, e.U.Format(`2006-01-02 15:04Z`),
+			"%v%"+strconv.Itoa(nwidth)+"v %v%v%v\n",
 			term.Green, e.N,
 			term.White, text,
 			term.Reset,

@@ -487,14 +487,18 @@ var lastCmd = &Z.Cmd{
 	},
 }
 
+//go:embed changescmd.md
+var changesDoc string
+
 var ChangesDefault = 5
 
 var changesCmd = &Z.Cmd{
-	Name:     `changes`,
-	Aliases:  []string{`changed`},
-	Usage:    `[help|COUNT|default|set default COUNT]`,
-	Summary:  `show most recent n nodes changed`,
-	Commands: []*Z.Cmd{help.Cmd},
+	Name:        `changes`,
+	Aliases:     []string{`changed`},
+	Usage:       `[help|COUNT|default|set default COUNT]`,
+	Summary:     `show most recent n nodes changed`,
+	UseVars:     true,
+	Commands:    []*Z.Cmd{help.Cmd, vars.Cmd},
 
 	Shortcuts: Z.ArgMap{
 		`default`: {`var`, `get`, `default`},
@@ -503,15 +507,13 @@ var changesCmd = &Z.Cmd{
 
 	Call: func(x *Z.Cmd, args ...string) error {
 		var err error
-		n := ChangesDefault
+		var n int
 
 		if len(args) > 0 {
-			n, err = strconv.Atoi(args[0])
-			if err != nil {
-				return err
-			}
+			n, _ = strconv.Atoi(args[0])
+		}
 
-		} else {
+		if n <= 0 {
 			def, err := x.Get(`default`)
 			if err == nil && def != "" {
 				n, err = strconv.Atoi(def)
@@ -519,6 +521,10 @@ var changesCmd = &Z.Cmd{
 					return err
 				}
 			}
+		}
+
+		if n <= 0 {
+			n = ChangesDefault
 		}
 
 		keg, err := current(x.Caller)

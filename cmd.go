@@ -586,11 +586,11 @@ var editCmd = &Z.Cmd{
 		}
 
 		atime := fs.ModTime(path)
-		if !atime.After(btime) {
-			return nil
+		if atime.After(btime) {
+			return Publish(keg.Path)
 		}
+		return nil
 
-		return Publish(keg.Path)
 	},
 }
 

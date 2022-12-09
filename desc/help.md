@@ -4,10 +4,10 @@ The {{aka}} command is for personal and public knowledge management as a Knowled
 
 The steps to create your first KEG directory are below, but first a little about the structure of this directory, which does not necessarily require this {{aka}} command to create and maintain.
 
-A KEG directory (aka "keg") is just a directory containing a {{pre "keg"}} YAML file and a number of directories that have a {{pre "README.md"}} file called **content nodes**. A node directory must have an incrementing integer name as would be used in a database table. A keg usually also has a {{pre "dex"}} directory containing at least two files:
+A KEG directory (aka "keg") is just a directory containing a `keg` YAML file and a number of directories that have a `README.md` file called **content nodes**. A node directory must have an incrementing integer name as would be used in a database table. A keg usually also has a `dex` directory containing at least two files:
 
-1. Latest changes {{pre "dex/changes.md"}}
-2. All nodes by ID {{pre "dex/nodes.tsv"}}
+1. Latest changes `dex/changes.md`
+2. All nodes by ID `dex/nodes.tsv`
 
 The {{aka}} command keeps these files up to date.
 
@@ -32,16 +32,16 @@ Okay, here are the specific steps to get started by creating your first keg dire
 
 ***Git and GitHub***
 
-It's important when using Git that either the remote git repo has been fully created (so that {{cmd "git pull"}} will work) or that {{cmd "git"}} has not been run at all (no {{pre ".git"}} directory). Otherwise, {{aka}} will attempt to pull and fail. These instructions assume the reader understands {{cmd "git"}} and the {{cmd "gh"}} commands.
+It's important when using Git that either the remote git repo has been fully created (so that {{cmd "git pull"}} will work) or that {{cmd "git"}} has not been run at all (no `.git`}} directory). Otherwise, {{aka}} will attempt to pull and fail. These instructions assume the reader understands {{cmd "git"}} and the {{cmd "gh"}} commands.
 
-Here are the steps to follow when Git and GitHub are wanted. They are essentially the same as {{pre "Getting Started"}} but include creating a GitHub repo with the {{cmd "gh"}} command afterward.
+Here are the steps to follow when Git and GitHub are wanted. They are essentially the same as `Getting Started` but include creating a GitHub repo with the {{cmd "gh"}} command afterward.
 
 1. Create a directory and change into it
 2. Run the {{aka}} {{cmd "init"}} command
 3. Update the YAML file it opens
 4. Exit your editor
 5. Create and push as Git repo with {{cmd "gh repo create"}}
-6. Continue with steps 9+ from Getting Started
+6. Continue with steps 9+ from `Getting Started`
 
 Alternatively, one can simply create a GitHub repo from the web site and {{cmd "git clone"}} it down to the local machine and then run {{aka}} {{cmd "init"}} from within it.
 
@@ -49,4 +49,4 @@ Alternatively, one can simply create a GitHub repo from the web site and {{cmd "
 
 Use the {{aka}} {{cmd "create sample"}} command to automatically create a new content node sample that introduces the KEG Markup Language (KEGML). You can delete it later after reading it. Or, you can use it instead of just {{aka}} {{cmd "create"}} (which gives you a blank) to help you remember how to write KEGML until you get proficient enough not to have to look it up every time.
 
-For more about the emerging KEG 2023-01 specification and how to create content that complies for knowledge exchange and publication (while we work more on linting and validation within the {{aka}} command) have a look at https://github.com/rwxrob/keg-spec
+For more about the emerging KEG 2023-01 specification and how to create content that complies for knowledge exchange and publication (while we work more on linting and validation within the {{aka}} command) have a look at <https://github.com/rwxrob/keg-spec>

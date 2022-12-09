@@ -270,7 +270,7 @@ var deleteCmd = &Z.Cmd{
 		}
 
 		dir := filepath.Join(keg.Path, id)
-		log.Println("deleting", dir)
+		log.Println("❌", dir)
 
 		if err := os.RemoveAll(dir); err != nil {
 			return err

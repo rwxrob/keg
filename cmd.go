@@ -88,7 +88,7 @@ func current(x *Z.Cmd) (*Local, error) {
 	return nil, fmt.Errorf("no kegs found") // FIXME with better error
 }
 
-//go:embed descriptions/help.md
+//go:embed desc/help.md
 var helpDoc string
 
 var Cmd = &Z.Cmd{
@@ -119,7 +119,7 @@ var Cmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/current.md
+//go:embed desc/current.md
 var currentDoc string
 
 var currentCmd = &Z.Cmd{
@@ -141,7 +141,7 @@ var currentCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/titles.md
+//go:embed desc/titles.md
 var titlesDoc string
 
 var titlesCmd = &Z.Cmd{
@@ -220,7 +220,7 @@ var directoryCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/delete.md
+//go:embed desc/delete.md
 var deleteDoc string
 
 var deleteCmd = &Z.Cmd{
@@ -290,7 +290,7 @@ var deleteCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/indexdoc.md
+//go:embed desc/indexdoc.md
 var indexDoc string
 
 var indexCmd = &Z.Cmd{
@@ -301,7 +301,7 @@ var indexCmd = &Z.Cmd{
 	Description: indexDoc,
 }
 
-//go:embed descriptions/dexupdate.md
+//go:embed desc/dexupdate.md
 var dexUpdateDoc string
 
 var dexUpdateCmd = &Z.Cmd{
@@ -318,7 +318,7 @@ var dexUpdateCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/last.md
+//go:embed desc/last.md
 var lastDoc string
 
 var lastCmd = &Z.Cmd{
@@ -362,7 +362,7 @@ var lastCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/changescmd.md
+//go:embed desc/changescmd.md
 var changesDoc string
 
 var ChangesDefault = 5
@@ -442,7 +442,7 @@ var DefaultInfoFile string
 //go:embed testdata/samplekeg/0/README.md
 var DefaultZeroNode string
 
-//go:embed descriptions/init.md
+//go:embed desc/init.md
 var initDoc string
 
 var initCmd = &Z.Cmd{
@@ -482,14 +482,14 @@ var initCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/edit.md
+//go:embed desc/edit.md
 var editDoc string
 
 var editCmd = &Z.Cmd{
 	Name:        `edit`,
 	Aliases:     []string{`e`},
 	Params:      []string{`last`, `same`},
-	Usage:       `(help|ID|last|same|TITLEWORD)`,
+	Usage:       `(help|ID|last|same|REGEX)`,
 	Summary:     `choose and edit a specific node (default)`,
 	Description: editDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
@@ -641,7 +641,7 @@ var createCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/random.md
+//go:embed desc/random.md
 var randomDoc string
 
 var randomCmd = &Z.Cmd{
@@ -678,7 +678,7 @@ var randomCmd = &Z.Cmd{
 	},
 }
 
-//go:embed descriptions/import.md
+//go:embed desc/import.md
 var importDoc string
 
 var importCmd = &Z.Cmd{
@@ -738,7 +738,7 @@ func columns(x *Z.Cmd) int {
 
 }
 
-//go:embed descriptions/columns.md
+//go:embed desc/columns.md
 var columnsDoc string
 
 var columnsCmd = &Z.Cmd{
@@ -763,7 +763,7 @@ type grepChoice struct {
 
 func (c grepChoice) String() string { return c.str }
 
-//go:embed descriptions/grep.md
+//go:embed desc/grep.md
 var grepDoc string
 
 var grepCmd = &Z.Cmd{
@@ -859,7 +859,7 @@ var dark []byte
 //go:embed testdata/keg-notty.json
 var notty []byte
 
-//go:embed descriptions/view.md
+//go:embed desc/view.md
 var viewDoc string
 
 var viewCmd = &Z.Cmd{

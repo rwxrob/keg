@@ -1,3 +1,5 @@
+choose and edit a specific node (default)
+
 The {{aka}} command opens a content node `README.md` file for editing. It is the default command when no other arguments match other commands. Nodes can be identified by integer ID, REGEXP matching the title, or the special `last` (last created) or `same` (last updated) parameters. For REGEXP if more than one match is found the user is prompted to choose between them.
 
 The editor opened depends on the following in order of priority:

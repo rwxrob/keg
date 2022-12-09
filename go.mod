@@ -4,12 +4,12 @@ go 1.18
 
 require (
 	github.com/charmbracelet/glamour v0.6.0
-	github.com/rwxrob/bonzai v0.20.8
+	github.com/rwxrob/bonzai v0.20.9
 	github.com/rwxrob/choose v0.2.1
 	github.com/rwxrob/conf v0.8.2
-	github.com/rwxrob/fs v0.18.1
+	github.com/rwxrob/fs v0.18.2
 	github.com/rwxrob/grep v0.2.5
-	github.com/rwxrob/help v0.7.0
+	github.com/rwxrob/help v0.7.2
 	github.com/rwxrob/json v0.8.0
 	github.com/rwxrob/pegn v0.2.1
 	github.com/rwxrob/term v0.2.9

@@ -1,3 +1,5 @@
+create and manage knowledge exchange graphs
+
 The {{aka}} command is for personal and public knowledge management as a Knowledge Exchange Graph (sometimes called "personal knowledge graph" or "zettelkasten"). Using {{aka}} you can create, update, search, and organize everything that passes through your brain that you may want to recall later, for whatever reason: school, training, team knowledge, or publishing a paper, article, blog, or book.
 
 ***Getting Started***
@@ -32,7 +34,7 @@ Okay, here are the specific steps to get started by creating your first keg dire
 
 ***Git and GitHub***
 
-It's important when using Git that either the remote git repo has been fully created (so that {{cmd "git pull"}} will work) or that {{cmd "git"}} has not been run at all (no `.git`}} directory). Otherwise, {{aka}} will attempt to pull and fail. These instructions assume the reader understands {{cmd "git"}} and the {{cmd "gh"}} commands.
+It's important when using Git that either the remote git repo has been fully created (so that {{cmd "git pull"}} will work) or that {{cmd "git"}} has not been run at all (no `.git` directory). Otherwise, {{aka}} will attempt to pull and fail. These instructions assume the reader understands {{cmd "git"}} and the {{cmd "gh"}} commands.
 
 Here are the steps to follow when Git and GitHub are wanted. They are essentially the same as `Getting Started` but include creating a GitHub repo with the {{cmd "gh"}} command afterward.
 

@@ -1,3 +1,5 @@
+show the current keg
+
 The {{aka}} command displays the current keg by name, which is resolved as follows:
 
 1.  The `KEG_CURRENT` environment variable

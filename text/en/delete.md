@@ -1,3 +1,5 @@
+delete node from current keg
+
 The {{aka}} command will delete a specified content node from the current keg. A node may be specified in any of the following ways:
 
 1. By integer node identifier

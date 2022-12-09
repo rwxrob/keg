@@ -85,25 +85,22 @@ func current(x *Z.Cmd) (*Local, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no kegs found") // FIXME with better error
+	return nil, fmt.Errorf(_NoKegsFound)
 }
-
-//go:embed desc/help.md
-var helpDoc string
 
 var Cmd = &Z.Cmd{
 	Name:        `keg`,
 	Aliases:     []string{`kn`},
-	Summary:     `create and manage knowledge exchange graphs`,
 	Version:     `v0.8.1`,
 	UseVars:     true,
 	Copyright:   `Copyright 2022 Robert S Muhlestein`,
 	License:     `Apache-2.0`,
 	Site:        `rwxrob.tv`,
 	Source:      `git@github.com:rwxrob/keg.git`,
-	Issues:      `github.com/rwxrob/keg/issues`,
+	Issues:      `https://github.com/rwxrob/keg/issues`,
 	ConfVars:    true,
-	Description: helpDoc,
+	Summary:     help.S(_keg),
+	Description: help.D(_keg),
 
 	Commands: []*Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
@@ -119,14 +116,11 @@ var Cmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/current.md
-var currentDoc string
-
 var currentCmd = &Z.Cmd{
 	Name:        `current`,
-	Summary:     `show the current keg`,
 	Commands:    []*Z.Cmd{help.Cmd},
-	Description: currentDoc,
+	Summary:     help.S(_current),
+	Description: help.D(_current),
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -141,16 +135,13 @@ var currentCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/titles.md
-var titlesDoc string
-
 var titlesCmd = &Z.Cmd{
 	Name:        `titles`,
 	Aliases:     []string{`title`},
 	Usage:       `(help|REGEXP)`,
-	Summary:     `find titles containing regular expression`,
 	UseVars:     true,
-	Description: titlesDoc,
+	Summary:     help.S(_titles),
+	Description: help.D(_titles),
 	Commands:    []*Z.Cmd{help.Cmd, vars.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -194,11 +185,13 @@ var titlesCmd = &Z.Cmd{
 }
 
 var directoryCmd = &Z.Cmd{
-	Name:     `directory`,
-	Aliases:  []string{`d`, `dir`},
-	MaxArgs:  1,
-	Summary:  `print path to directory of current keg or node`,
-	Commands: []*Z.Cmd{help.Cmd},
+	Name:        `directory`,
+	Aliases:     []string{`d`, `dir`},
+	Usage:       `[help|REGEXP]`,
+	MaxArgs:     1,
+	Summary:     help.S(_directory),
+	Description: help.D(_directory),
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -209,7 +202,11 @@ var directoryCmd = &Z.Cmd{
 
 		if len(args) > 0 {
 			dex, _ := ReadDex(keg.Path)
-			choice := dex.ChooseWithTitleText(strings.Join(args, " "))
+			re, err := regexp.Compile(args[0])
+			if err != nil {
+				return err
+			}
+			choice := dex.ChooseWithTitleTextExp(re)
 			term.Print(filepath.Join(keg.Path, strconv.Itoa(choice.N)))
 			return nil
 		}
@@ -220,16 +217,13 @@ var directoryCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/delete.md
-var deleteDoc string
-
 var deleteCmd = &Z.Cmd{
 	Name:        `delete`,
-	Summary:     `delete node from current keg`,
-	MinArgs:     1,
-	Aliases:     []string{`del`, `rm`},
 	Usage:       `(help|INTEGER_NODE_ID|last|same)`,
-	Description: deleteDoc,
+	Aliases:     []string{`del`, `rm`},
+	Summary:     help.S(_delete),
+	Description: help.D(_delete),
+	MinArgs:     1,
 	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -270,7 +264,7 @@ var deleteCmd = &Z.Cmd{
 
 			entry = dex.Lookup(idn)
 			if entry == nil {
-				return fmt.Errorf("node not found: %v", idn)
+				return fmt.Errorf(_NodeNotFound, idn)
 			}
 			id = entry.ID()
 		}
@@ -290,25 +284,19 @@ var deleteCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/indexdoc.md
-var indexDoc string
-
 var indexCmd = &Z.Cmd{
 	Name:        `index`,
 	Aliases:     []string{`dex`},
 	Commands:    []*Z.Cmd{help.Cmd, dexUpdateCmd},
-	Summary:     `work with indexes`,
-	Description: indexDoc,
+	Summary:     help.S(_index),
+	Description: help.D(_index),
 }
-
-//go:embed desc/dexupdate.md
-var dexUpdateDoc string
 
 var dexUpdateCmd = &Z.Cmd{
 	Name:        `update`,
 	Commands:    []*Z.Cmd{help.Cmd},
-	Summary:     `update dex/changes.md and dex/nodes.tsv`,
-	Description: dexUpdateDoc,
+	Summary:     help.S(_index_update),
+	Description: help.D(_index_update),
 	Call: func(x *Z.Cmd, args ...string) error {
 		keg, err := current(x.Caller.Caller) // keg dex update
 		if err != nil {
@@ -318,17 +306,15 @@ var dexUpdateCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/last.md
-var lastDoc string
-
 var lastCmd = &Z.Cmd{
 	Name:        `last`,
 	Usage:       `[help|dir|id|title|time]`,
 	Params:      []string{`dir`, `id`, `title`, `time`},
 	MaxArgs:     1,
-	Summary:     `show last created node`,
-	Description: lastDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
+	Summary:     help.S(_last),
+	Description: help.D(_last),
+
 	Call: func(x *Z.Cmd, args ...string) error {
 
 		keg, err := current(x.Caller)
@@ -362,19 +348,17 @@ var lastCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/changescmd.md
-var changesDoc string
-
 var ChangesDefault = 5
 
 var changesCmd = &Z.Cmd{
 	Name:        `changes`,
 	Aliases:     []string{`changed`},
 	Usage:       `[help|COUNT|default|set default COUNT]`,
-	Summary:     `show most recent n nodes changed`,
 	UseVars:     true,
-	Description: changesDoc,
+	Summary:     help.S(_changes),
+	Description: help.D(_changes),
 	Commands:    []*Z.Cmd{help.Cmd, vars.Cmd},
+
 	Dynamic: template.FuncMap{
 		`changesdef`: func() int { return ChangesDefault },
 	},
@@ -413,7 +397,7 @@ var changesCmd = &Z.Cmd{
 
 		path := filepath.Join(keg.Path, `dex/changes.md`)
 		if !fs.Exists(path) {
-			return fmt.Errorf("dex/changes.md file does not exist")
+			return fmt.Errorf(_FileNotFound, `dex/changes.md`)
 		}
 
 		lines, err := file.Head(path, n)
@@ -436,32 +420,23 @@ var changesCmd = &Z.Cmd{
 	},
 }
 
-//go:embed testdata/samplekeg/keg
-var DefaultInfoFile string
-
-//go:embed testdata/samplekeg/0/README.md
-var DefaultZeroNode string
-
-//go:embed desc/init.md
-var initDoc string
-
 var initCmd = &Z.Cmd{
 	Name:        `init`,
 	Usage:       `[help]`,
-	Summary:     `initialize current working dir as new keg`,
-	Description: initDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
+	Summary:     help.S(_init),
+	Description: help.D(_init),
 
 	Call: func(_ *Z.Cmd, _ ...string) error {
 
 		if fs.NotExists(`keg`) {
-			if err := file.Overwrite(`keg`, DefaultInfoFile); err != nil {
+			if err := file.Overwrite(`keg`, _kegyaml); err != nil {
 				return err
 			}
 		}
 
 		if fs.NotExists(`0/README.md`) {
-			if err := file.Overwrite(`0/README.md`, DefaultZeroNode); err != nil {
+			if err := file.Overwrite(`0/README.md`, _zero_node); err != nil {
 				return err
 			}
 		}
@@ -482,16 +457,13 @@ var initCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/edit.md
-var editDoc string
-
 var editCmd = &Z.Cmd{
 	Name:        `edit`,
 	Aliases:     []string{`e`},
 	Params:      []string{`last`, `same`},
 	Usage:       `(help|ID|last|same|REGEX)`,
-	Summary:     `choose and edit a specific node (default)`,
-	Description: editDoc,
+	Summary:     help.S(_edit),
+	Description: help.D(_edit),
 	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -552,7 +524,7 @@ var editCmd = &Z.Cmd{
 
 				entry = dex.ChooseWithTitleTextExp(re)
 				if entry == nil {
-					return fmt.Errorf("unable to choose a title")
+					return fmt.Errorf(_ChooseTitleFail)
 				}
 
 				id = strconv.Itoa(entry.N)
@@ -562,7 +534,7 @@ var editCmd = &Z.Cmd{
 		path := filepath.Join(keg.Path, id, `README.md`)
 
 		if !fs.Exists(path) {
-			return fmt.Errorf("content node (%s) does not exist in %q", id, keg.Name)
+			return fmt.Errorf(_NodeNotFound, id)
 		}
 
 		btime := fs.ModTime(path)
@@ -595,12 +567,13 @@ var editCmd = &Z.Cmd{
 }
 
 var createCmd = &Z.Cmd{
-	Name:     `create`,
-	Aliases:  []string{`c`},
-	Params:   []string{`sample`},
-	Summary:  `create and edit content node`,
-	MaxArgs:  1,
-	Commands: []*Z.Cmd{help.Cmd},
+	Name:        `create`,
+	Aliases:     []string{`c`},
+	Params:      []string{`sample`},
+	MaxArgs:     1,
+	Summary:     help.S(_create),
+	Description: help.D(_create),
+	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -641,17 +614,14 @@ var createCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/random.md
-var randomDoc string
-
 var randomCmd = &Z.Cmd{
 	Name:        `random`,
 	Aliases:     []string{`rand`},
 	Usage:       `[help|title|id|dir|edit]`,
 	Params:      []string{`title`, `id`, `dir`, `edit`},
 	MaxArgs:     1,
-	Summary:     `return random node, gamify content editing`,
-	Description: randomDoc,
+	Summary:     help.S(_random),
+	Description: help.D(_random),
 	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -678,15 +648,12 @@ var randomCmd = &Z.Cmd{
 	},
 }
 
-//go:embed desc/import.md
-var importDoc string
-
 var importCmd = &Z.Cmd{
 	Name:        `import`,
 	Usage:       `[help|(DIR|NODEDIR)...]`,
-	Summary:     `import nodes into current keg`,
-	Description: importDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
+	Summary:     help.S(_import),
+	Description: help.D(_import),
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -698,7 +665,7 @@ var importCmd = &Z.Cmd{
 		if len(args) == 0 {
 			d := dir.Abs()
 			if d == "" {
-				return fmt.Errorf("unable to determine absolute path to current directory")
+				return fmt.Errorf(_AbsPathFail)
 			}
 			args = append(args, d)
 		}
@@ -738,15 +705,12 @@ func columns(x *Z.Cmd) int {
 
 }
 
-//go:embed desc/columns.md
-var columnsDoc string
-
 var columnsCmd = &Z.Cmd{
 	Name:        `columns`,
 	Usage:       `(help|col|cols)`,
+	Summary:     help.S(_columns),
+	Description: help.D(_columns),
 	MaxArgs:     1,
-	Summary:     `print the number of columns resolved`,
-	Description: columnsDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
 	Dynamic:     template.FuncMap{`columns`: func() int { return DefColumns }},
 
@@ -763,16 +727,13 @@ type grepChoice struct {
 
 func (c grepChoice) String() string { return c.str }
 
-//go:embed desc/grep.md
-var grepDoc string
-
 var grepCmd = &Z.Cmd{
 	Name:        `grep`,
 	Usage:       `(help|REGEXP)`,
 	MinArgs:     1,
-	Summary:     `grep regular expression out of all nodes`,
-	Description: grepDoc,
 	Commands:    []*Z.Cmd{help.Cmd},
+	Summary:     help.S(_grep),
+	Description: help.D(_grep),
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
@@ -859,14 +820,11 @@ var dark []byte
 //go:embed testdata/keg-notty.json
 var notty []byte
 
-//go:embed desc/view.md
-var viewDoc string
-
 var viewCmd = &Z.Cmd{
 	Name:        `view`,
-	Summary:     `view a specific node`,
 	Usage:       `(help|ID|REGEXP)`,
-	Description: viewDoc,
+	Summary:     help.S(_view),
+	Description: help.D(_view),
 	Params:      []string{`last`, `same`},
 	MinArgs:     1,
 	Commands:    []*Z.Cmd{help.Cmd},
@@ -917,7 +875,7 @@ var viewCmd = &Z.Cmd{
 
 				choice := dex.ChooseWithTitleTextExp(re)
 				if choice == nil {
-					return fmt.Errorf("unable to choose a title")
+					return fmt.Errorf(_ChooseTitleFail)
 				}
 
 				id = strconv.Itoa(choice.N)
@@ -927,7 +885,7 @@ var viewCmd = &Z.Cmd{
 		path := filepath.Join(keg.Path, id, `README.md`)
 
 		if !fs.Exists(path) {
-			return fmt.Errorf("content node (%s) does not exist in %q", id, keg.Name)
+			return fmt.Errorf(_NodeNotFound, id)
 		}
 
 		buf, err := os.ReadFile(path)

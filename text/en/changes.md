@@ -1,3 +1,5 @@
+show most recent n node changes
+
 The {{aka}} command displays COUNT content nodes in reverse chronological order that were most recently updated. If no COUNT is specified, the number displayed is {{changesdef}} by default, but this can be changed by setting the `changes` variable to something else:
 
     keg changes set default 10

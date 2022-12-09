@@ -1,3 +1,5 @@
+initialize current working dir as new keg
+
 The {{aka}} command creates a `keg` YAML file in the current working directory and opens it up for editing.
 
 {{aka}} also creates a **zero node** (`../0`) typically used for linking to planned content from other content nodes.

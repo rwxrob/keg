@@ -49,7 +49,7 @@ func ParseDex(in any) (*Dex, error) {
 	for line := 1; s.Scan(); line++ {
 		f := LatestDexEntryExp.FindStringSubmatch(s.Text())
 		if len(f) != 4 {
-			return nil, fmt.Errorf("bad line in changes.md: %v", line)
+			return nil, fmt.Errorf(_BadChangesLine, line)
 		}
 		if t, err := time.Parse(IsoDateFmt, string(f[1])); err != nil {
 			return nil, err
@@ -116,7 +116,7 @@ func MakeDex(kegdir string) error {
 	for _, entry := range *_dex {
 		d := filepath.Join(kegdir, entry.ID())
 		if dir.IsEmpty(d) {
-			log.Println("deleting", d)
+			log.Println("❌", d)
 			if err := os.RemoveAll(d); err != nil {
 				return err
 			}
@@ -236,10 +236,7 @@ func Publish(kegpath string) error {
 	os.Chdir(filepath.Dir(gitd))
 	if err := Z.Exec(`git`, `-C`, kegpath, `pull`); err != nil {
 		if _, is := err.(*exec.ExitError); is {
-			return fmt.Errorf(
-				"%vNo remote repo has been setup.%v First create it and git push to it.",
-				term.Red, term.X,
-			)
+			return fmt.Errorf(_NoRemoteRepo, term.Red, term.X)
 		}
 	}
 	if err := Z.Exec(`git`, `-C`, kegpath, `add`, `-A`, `.`); err != nil {
@@ -279,7 +276,7 @@ func MakeNode(kegpath string) (*DexEntry, error) {
 func Edit(kegpath string, id int) error {
 	node := strconv.Itoa(id)
 	if node == "" {
-		return fmt.Errorf(`node (%q) is not a valid node id`, id)
+		return fmt.Errorf(_InvalidNodeID, id)
 	}
 	readme := filepath.Join(kegpath, node, `README.md`)
 	return file.Edit(readme)
@@ -357,7 +354,7 @@ func WriteSample(kegpath string, entry *DexEntry) error {
 // resolution of any links contained within any node README.md file.
 func Import(kegpath string, targets ...string) error {
 	if !fs.IsDir(kegpath) {
-		return fmt.Errorf("not a directory or does not exist: %v", kegpath)
+		return fmt.Errorf(_NotDirNotExist, kegpath)
 	}
 	for _, target := range targets {
 		if fs.NameIsInt(target) {
@@ -385,7 +382,7 @@ func ImportNode(kegpath, target string) error {
 
 	next := Next(kegpath)
 	if next == nil {
-		return fmt.Errorf(`could not determine next node id for %v`, target)
+		return fmt.Errorf(_CantGetNextNode, target)
 	}
 
 	next.T, err = kegml.ReadTitle(filepath.Join(target, `README.md`))

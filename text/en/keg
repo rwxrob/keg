@@ -1,0 +1,32 @@
+updated: 2022-11-26 19:33:24Z
+kegv:    2023-01
+
+title:   A Sample Keg
+url:     git@github.com:YOU/keg.git
+creator: git@github.com:YOU/YOU.git
+state:   living
+
+summary:
+  👋 Hey there! The KEG community welcomes you. This is an initial
+  sample `keg` file. It uses a simplified YAML format. (If you know JSON,
+  you know this.) Go ahead and change this summary and anything else you
+  like, but keep in mind the following:
+  
+  * The updated line MUST be the first line
+  * Everything *but* the updated line is optional
+  * You can leave the indexes section alone (they are on by default)
+  * Change **creator** to the URL for your main keg
+  * Change the **url** to the main place to find this keg
+  * Change **state** only if you are planning something more formal
+  * Keep the **zero node** created to link to for planned content
+  
+  If you are a `vim` user you might want to add something like the
+  following to your `.vimrc`:
+  
+    au bufnewfile,bufRead keg set ft=yaml
+
+indexes:
+  - file: dex/changes.md
+    summary: latest changes
+  - file: dex/nodes.tsv
+    summary: all nodes by id

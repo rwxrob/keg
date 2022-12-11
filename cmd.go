@@ -922,6 +922,8 @@ var viewCmd = &Z.Cmd{
 	},
 }
 
+var lastfmtExp = regexp.MustCompile(`(?:^|\n)linkfmt:\s*(.+)(?:\n|$)`)
+
 var linkCmd = &Z.Cmd{
 	Name:        `link`,
 	Aliases:     []string{`url`},
@@ -930,10 +932,31 @@ var linkCmd = &Z.Cmd{
 	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
-		// TODO select like edit
-		// TODO get the number
-		// TODO parse the keg file
-		// TODO print with the template from the yaml
+
+		keg, id, _, err := get(x, args)
+		if err != nil {
+			return err
+		}
+
+		kegfile := filepath.Join(keg.Path, `keg`)
+
+		buf, err := os.ReadFile(kegfile)
+		if err != nil {
+			return err
+		}
+
+		f := lastfmtExp.FindStringSubmatch(string(buf))
+		if f == nil {
+			return fmt.Errorf(_NotInKegFile, `lastfmt`)
+		}
+		url := f[1]
+
+		i := strings.Index(url, `{{id}}`)
+		if i < 0 {
+			return fmt.Errorf(_StringHasNo, `{{id}}`)
+		}
+		term.Print(url[:i] + id + url[i+6:])
+
 		return nil
 	},
 }

@@ -77,4 +77,6 @@ const (
 	_NoRemoteRepo    = `%vNo remote repo has been setup.%v First create it and git push to it.`
 	_NotDirNotExist  = `not a directory or does not exist: %v`
 	_CantGetNextNode = `could not determine next node id: %v`
+	_NotInKegFile    = `keg file does not contain: %v`
+	_StringHasNo     = `string does not contain: %v`
 )

@@ -35,6 +35,74 @@ func init() {
 
 var DefColumns = 100
 
+// -------------------------------- get -------------------------------
+
+func get(x *Z.Cmd, args []string) (keg *Local, id string, entry *DexEntry, err error) {
+
+	keg, err = current(x.Caller)
+	if err != nil {
+		return
+	}
+
+	switch args[0] {
+
+	case "same":
+		if entry = LastChanged(keg.Path); entry != nil {
+			id = entry.ID()
+		}
+
+	case "last":
+		if entry = Last(keg.Path); entry != nil {
+			id = entry.ID()
+		}
+
+	default:
+
+		var dex *Dex
+		dex, err = ReadDex(keg.Path)
+		if err != nil {
+			return
+		}
+
+		var idn int
+		idn, err = strconv.Atoi(args[0])
+
+		if err == nil {
+
+			entry = dex.Lookup(idn)
+			id = entry.ID()
+
+		} else {
+
+			var pre string
+			pre, err = x.Caller.Get(`regxpre`)
+			if err != nil {
+				return
+			}
+			if pre == "" {
+				pre = `(?i)`
+			}
+
+			var re *regexp.Regexp
+			re, err = regexp.Compile(pre + args[0])
+			if err != nil {
+				return
+			}
+
+			entry = dex.ChooseWithTitleTextExp(re)
+			if entry == nil {
+				err = fmt.Errorf(_ChooseTitleFail)
+				return
+			}
+
+			id = entry.ID()
+		}
+	}
+	return
+}
+
+// ------------------------------ current -----------------------------
+
 // has to stay here because needs vars package from x
 func current(x *Z.Cmd) (*Local, error) {
 	var name, dir string
@@ -88,6 +156,8 @@ func current(x *Z.Cmd) (*Local, error) {
 	return nil, fmt.Errorf(_NoKegsFound)
 }
 
+// ------------------------------- Cmds -------------------------------
+
 var Cmd = &Z.Cmd{
 	Name:        `keg`,
 	Aliases:     []string{`kn`},
@@ -106,7 +176,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		indexCmd, createCmd, currentCmd, directoryCmd, deleteCmd,
 		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
-		importCmd, grepCmd, viewCmd, columnsCmd,
+		importCmd, grepCmd, viewCmd, columnsCmd, linkCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -228,48 +298,13 @@ var deleteCmd = &Z.Cmd{
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
-		keg, err := current(x.Caller)
+		keg, id, entry, err := get(x, args)
 		if err != nil {
 			return err
 		}
 
-		id := args[0]
-		var entry *DexEntry
-
-		switch {
-
-		case id == "same":
-
-			if entry = LastChanged(keg.Path); entry != nil {
-				id = entry.ID()
-			}
-
-		case id == "last":
-
-			if entry = Last(keg.Path); entry != nil {
-				id = entry.ID()
-			}
-
-		default:
-
-			var idn int
-			if idn, err = strconv.Atoi(id); err != nil {
-				return x.UsageError()
-			}
-
-			dex, err := ReadDex(keg.Path)
-			if err != nil {
-				return err
-			}
-
-			entry = dex.Lookup(idn)
-			if entry == nil {
-				return fmt.Errorf(_NodeNotFound, idn)
-			}
-			id = entry.ID()
-		}
-
 		dir := filepath.Join(keg.Path, id)
+
 		log.Println("❌", dir)
 
 		if err := os.RemoveAll(dir); err != nil {
@@ -456,7 +491,6 @@ var initCmd = &Z.Cmd{
 		return Publish(dir)
 	},
 }
-
 var editCmd = &Z.Cmd{
 	Name:        `edit`,
 	Aliases:     []string{`e`},
@@ -476,63 +510,12 @@ var editCmd = &Z.Cmd{
 			return titlesCmd.Call(x, args...)
 		}
 
-		keg, err := current(x.Caller)
+		keg, id, entry, err := get(x, args)
 		if err != nil {
 			return err
 		}
 
-		id := args[0]
-		var entry *DexEntry
-
-		switch id {
-
-		case "same":
-			if entry = LastChanged(keg.Path); entry != nil {
-				id = entry.ID()
-			}
-
-		case "last":
-			if entry = Last(keg.Path); entry != nil {
-				id = entry.ID()
-			}
-
-		default:
-
-			dex, err := ReadDex(keg.Path)
-			if err != nil {
-				return err
-			}
-
-			idn, err := strconv.Atoi(id)
-
-			if err == nil {
-				entry = dex.Lookup(idn)
-			} else {
-
-				pre, err := x.Caller.Get(`regxpre`)
-				if err != nil {
-					return err
-				}
-				if pre == "" {
-					pre = `(?i)`
-				}
-
-				re, err := regexp.Compile(pre + args[0])
-				if err != nil {
-					return err
-				}
-
-				entry = dex.ChooseWithTitleTextExp(re)
-				if entry == nil {
-					return fmt.Errorf(_ChooseTitleFail)
-				}
-
-				id = strconv.Itoa(entry.N)
-			}
-		}
-
 		path := filepath.Join(keg.Path, id, `README.md`)
-
 		if !fs.Exists(path) {
 			return fmt.Errorf(_NodeNotFound, id)
 		}
@@ -935,6 +918,22 @@ var viewCmd = &Z.Cmd{
 		}
 		Z.Page(out)
 
+		return nil
+	},
+}
+
+var linkCmd = &Z.Cmd{
+	Name:        `link`,
+	Aliases:     []string{`url`},
+	Summary:     help.S(_link),
+	Description: help.D(_link),
+	Commands:    []*Z.Cmd{help.Cmd},
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		// TODO select like edit
+		// TODO get the number
+		// TODO parse the keg file
+		// TODO print with the template from the yaml
 		return nil
 	},
 }

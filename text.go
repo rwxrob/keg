@@ -63,6 +63,9 @@ var _kegyaml string
 //go:embed text/en/zero-node.md
 var _zero_node string
 
+//go:embed text/en/link.md
+var _link string
+
 const (
 	_NoKegsFound     = `no kegs found`
 	_NodeNotFound    = `node not found: %v`

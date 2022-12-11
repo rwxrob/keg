@@ -70,6 +70,10 @@ func get(x *Z.Cmd, args []string) (keg *Local, id string, entry *DexEntry, err e
 		if err == nil {
 
 			entry = dex.Lookup(idn)
+			if entry == nil {
+				err = fmt.Errorf(_NodeNotFound, idn)
+				return
+			}
 			id = entry.ID()
 
 		} else {

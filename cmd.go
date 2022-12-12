@@ -969,8 +969,7 @@ var tagCmd = &Z.Cmd{
 	Name:        `tag`,
 	Aliases:     []string{`tags`},
 	Params:      []string{`edit`},
-	Usage:       `(help|edit|TAGS (NODEID|same|last|REGEXP))`,
-	MinArgs:     1,
+	Usage:       `[help|edit|all|TAGS (NODEID|same|last|REGEXP)]`,
 	Summary:     help.S(_tag),
 	Description: help.D(_tag),
 	Commands:    []*Z.Cmd{help.Cmd},
@@ -980,6 +979,10 @@ var tagCmd = &Z.Cmd{
 		keg, err := current(x.Caller)
 		if err != nil {
 			return err
+		}
+
+		if len(args) == 0 {
+			args = append(args, `all`)
 		}
 
 		if len(args) == 1 {

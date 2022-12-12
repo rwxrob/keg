@@ -99,3 +99,31 @@ func ExampleDex_Delete() {
 	// * 0001-01-01 00:00:00Z [One](../1)
 	// * 0001-01-01 00:00:00Z [Three](../3)
 }
+
+func ExampleTagsMap_Unmarshal() {
+	text := []byte("foo 34 23 4\nother 2\n")
+	tmap := keg.TagsMap{}
+	err := tmap.UnmarshalText(text)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(tmap)
+	// Unordered Output:
+	// other 2
+	// foo 34 23 4
+}
+
+func ExampleTagsMap_Marshal() {
+	tl := keg.TagsMap{
+		`foo`:   {`34`, `23`, `4`},
+		`other`: {`2`},
+	}
+	buf, err := tl.MarshalText()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(buf))
+	// Unordered Output:
+	// other 2
+	// foo 34 23 4
+}

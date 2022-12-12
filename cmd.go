@@ -180,7 +180,7 @@ var Cmd = &Z.Cmd{
 		editCmd, help.Cmd, conf.Cmd, vars.Cmd,
 		indexCmd, createCmd, currentCmd, directoryCmd, deleteCmd,
 		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
-		importCmd, grepCmd, viewCmd, columnsCmd, linkCmd,
+		importCmd, grepCmd, viewCmd, columnsCmd, linkCmd, tagCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -961,6 +961,19 @@ var linkCmd = &Z.Cmd{
 		}
 		term.Print(url[:i] + id + url[i+6:])
 
+		return nil
+	},
+}
+
+var tagCmd = &Z.Cmd{
+	Name:        `tag`,
+	Aliases:     []string{``},
+	Summary:     help.S(_tag),
+	Description: help.D(_tag),
+	Commands:    []*Z.Cmd{help.Cmd},
+
+	Call: func(x *Z.Cmd, args ...string) error {
+		// TODO
 		return nil
 	},
 }

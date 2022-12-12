@@ -1,6 +1,7 @@
 package keg
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"math/rand"
@@ -384,4 +385,44 @@ func (d *Dex) Delete(entry *DexEntry) {
 		(*d)[i] = (*d)[i+1]
 	}
 	(*d) = (*d)[:len(*d)-1]
+}
+
+// ----------------------------- TagsList -----------------------------
+
+type TagsMap map[string][]string
+
+func (tl TagsMap) String() string {
+	var str string
+	for k, v := range tl {
+		str += k + " " + strings.Join(v, " ") + "\n"
+	}
+	return str[:len(str)-1]
+}
+
+func (tl TagsMap) MarshalText() ([]byte, error) {
+	var str string
+	for k, v := range tl {
+		str += k + " " + strings.Join(v, " ") + "\n"
+	}
+	return []byte(str[:len(str)-1]), nil
+}
+
+// UnmarshalText parses the tag lines items from the bytes buffer and
+// sets the key pair for that tag to the values overwriting any that
+// were already set.
+func (tl TagsMap) UnmarshalText(buf []byte) error {
+	s := bufio.NewScanner(strings.NewReader(string(buf)))
+	for s.Scan() {
+		line := s.Text()
+		f := strings.Split(line, " ")
+		switch len(f) {
+		case 0:
+			return fmt.Errorf(_InvalidTagLine, line)
+		case 1:
+			return nil
+		default:
+			tl[f[0]] = f[1:]
+		}
+	}
+	return nil
 }

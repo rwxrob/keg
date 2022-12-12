@@ -66,6 +66,9 @@ var _zero_node string
 //go:embed text/en/link.md
 var _link string
 
+//go:embed text/en/tag.md
+var _tag string
+
 const (
 	_NoKegsFound     = `no kegs found`
 	_NodeNotFound    = `node not found: %v`
@@ -79,4 +82,5 @@ const (
 	_CantGetNextNode = `could not determine next node id: %v`
 	_NotInKegFile    = `keg file does not contain: %v`
 	_StringHasNo     = `string does not contain: %v`
+	_InvalidTagLine  = `invalid tag line: %v`
 )

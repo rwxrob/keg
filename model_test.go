@@ -127,3 +127,15 @@ func ExampleTagsMap_Marshal() {
 	// other 2
 	// foo 34 23 4
 }
+
+/*
+func ExampleTagsMap_Write() {
+	tl := keg.TagsMap{
+		`foo`:   {`34`, `23`, `4`},
+		`other`: {`2`},
+	}
+	tl.Write(`testdata/some`)
+	// Unordered Output:
+	// ignored
+}
+*/

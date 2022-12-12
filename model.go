@@ -14,6 +14,7 @@ import (
 
 	"github.com/rwxrob/choose"
 	"github.com/rwxrob/fs"
+	"github.com/rwxrob/fs/file"
 	"github.com/rwxrob/json"
 	"github.com/rwxrob/keg/kegml"
 	"github.com/rwxrob/term"
@@ -396,9 +397,6 @@ func (tl TagsMap) String() string {
 	for k, v := range tl {
 		str += k + " " + strings.Join(v, " ") + "\n"
 	}
-	if len(str) > 0 {
-		return str[:len(str)-1]
-	}
 	return str
 }
 
@@ -407,7 +405,12 @@ func (tl TagsMap) MarshalText() ([]byte, error) {
 	for k, v := range tl {
 		str += k + " " + strings.Join(v, " ") + "\n"
 	}
-	return []byte(str[:len(str)-1]), nil
+	return []byte(str), nil
+}
+
+//Write writes the marshaled text of a TagsMap to the file at path.
+func (tl TagsMap) Write(path string) error {
+	return file.Overwrite(path, tl.String())
 }
 
 // UnmarshalText parses the tag lines items from the bytes buffer and

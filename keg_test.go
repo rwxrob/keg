@@ -122,3 +122,24 @@ func ExampleReadTags() {
 	// Output:
 	// 6
 }
+
+func ExampleGrepTags() {
+	str, err := keg.GrepTags(`testdata/samplekeg`, `foo`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output:
+	// foo 2 6 3
+}
+
+func ExampleGrepTags_multiple() {
+	str, err := keg.GrepTags(`testdata/samplekeg`, `foo,bar`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(str)
+	// Output:
+	// foo 2 6 3
+	// bar 8
+}

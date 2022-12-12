@@ -427,3 +427,75 @@ func ReadTags(kegdir string) (TagsMap, error) {
 	}
 	return tmap, nil
 }
+
+// GrepTags returns all the lines from dex/tags with any of the tags
+// listed (separated by comma).
+func GrepTags(kegdir, tags string) (string, error) {
+	var lines string
+	_tags := strings.Split(tags, `,`)
+
+	buf, err := os.ReadFile(filepath.Join(kegdir, `dex`, `tags`))
+	if err != nil {
+		return "", err
+	}
+
+	s := bufio.NewScanner(strings.NewReader(string(buf)))
+	for s.Scan() {
+		line := s.Text()
+		for _, t := range _tags {
+			if strings.HasPrefix(line, t+` `) {
+				lines += line + "\n"
+			}
+		}
+	}
+
+	return lines, nil
+}
+
+// Tag will add the id specified to the dex/tags file, one entry for
+// each line containing one of the comma-separated tags. The
+// rwxrob/fs/file.Overwrite function is used preventing concurrent
+// writes to the file, but it is possible that the file could change
+// by another process before the Overwrite takes place. Therefore,
+// other measures to preserve transactional integrity should be taken
+// where needed. If the dex/tags file does not exist will create it.
+func Tag(kegdir, id, tags string) error {
+
+	tagsfile := filepath.Join(kegdir, `dex`, `tags`)
+	if err := file.Touch(tagsfile); err != nil {
+		return err
+	}
+
+	tmap, err := ReadTags(kegdir)
+	if err != nil {
+		return err
+	}
+
+	_tags := strings.Split(tags, `,`)
+
+	for _, tag := range _tags {
+		v, have := tmap[tag]
+		if !have {
+			tmap[tag] = []string{id}
+			continue
+		}
+		var saw bool
+		for _, _id := range v {
+			if _id == id {
+				saw = true
+			}
+		}
+		if !saw {
+			tmap[tag] = append(tmap[tag], id)
+		}
+	}
+
+	return tmap.Write(tagsfile)
+}
+
+// Tags returns a space separated string with all the tags currently in
+// use (even if no nodes yet assigned).
+func Tags(kegdir string) string {
+	path := filepath.Join(kegdir, `dex`, `tags`)
+	return strings.Join(file.Field(path, 1), ` `)
+}

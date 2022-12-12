@@ -37,14 +37,14 @@ var DefColumns = 100
 
 // -------------------------------- get -------------------------------
 
-func get(x *Z.Cmd, args []string) (keg *Local, id string, entry *DexEntry, err error) {
+func get(x *Z.Cmd, it string) (keg *Local, id string, entry *DexEntry, err error) {
 
 	keg, err = current(x.Caller)
 	if err != nil {
 		return
 	}
 
-	switch args[0] {
+	switch it {
 
 	case "same":
 		if entry = LastChanged(keg.Path); entry != nil {
@@ -65,7 +65,7 @@ func get(x *Z.Cmd, args []string) (keg *Local, id string, entry *DexEntry, err e
 		}
 
 		var idn int
-		idn, err = strconv.Atoi(args[0])
+		idn, err = strconv.Atoi(it)
 
 		if err == nil {
 
@@ -88,7 +88,7 @@ func get(x *Z.Cmd, args []string) (keg *Local, id string, entry *DexEntry, err e
 			}
 
 			var re *regexp.Regexp
-			re, err = regexp.Compile(pre + args[0])
+			re, err = regexp.Compile(pre + it)
 			if err != nil {
 				return
 			}
@@ -302,7 +302,7 @@ var deleteCmd = &Z.Cmd{
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
-		keg, id, entry, err := get(x, args)
+		keg, id, entry, err := get(x, args[0])
 		if err != nil {
 			return err
 		}
@@ -514,7 +514,7 @@ var editCmd = &Z.Cmd{
 			return titlesCmd.Call(x, args...)
 		}
 
-		keg, id, entry, err := get(x, args)
+		keg, id, entry, err := get(x, args[0])
 		if err != nil {
 			return err
 		}
@@ -937,7 +937,7 @@ var linkCmd = &Z.Cmd{
 
 	Call: func(x *Z.Cmd, args ...string) error {
 
-		keg, id, _, err := get(x, args)
+		keg, id, _, err := get(x, args[0])
 		if err != nil {
 			return err
 		}
@@ -967,13 +967,54 @@ var linkCmd = &Z.Cmd{
 
 var tagCmd = &Z.Cmd{
 	Name:        `tag`,
-	Aliases:     []string{``},
+	Aliases:     []string{`tags`},
+	Params:      []string{`edit`},
+	Usage:       `(help|edit|TAGS (NODEID|same|last|REGEXP))`,
+	MinArgs:     1,
 	Summary:     help.S(_tag),
 	Description: help.D(_tag),
 	Commands:    []*Z.Cmd{help.Cmd},
 
 	Call: func(x *Z.Cmd, args ...string) error {
-		// TODO
-		return nil
+
+		keg, err := current(x.Caller)
+		if err != nil {
+			return err
+		}
+
+		if len(args) == 1 {
+
+			if args[0] == `edit` {
+				return file.Edit(filepath.Join(keg.Path, `dex`, `tags`))
+			}
+
+			if args[0] == `list` {
+				tags := Tags(keg.Path)
+				if len(tags) > 0 {
+					term.Print(tags)
+				}
+				return nil
+			}
+
+			if args[0] == `all` {
+				str, err := os.ReadFile(filepath.Join(keg.Path, `dex`, `tags`))
+				if err != nil {
+					return err
+				}
+				fmt.Print(string(str))
+				return nil
+			}
+
+			str, err := GrepTags(keg.Path, args[0])
+			if err != nil {
+				return err
+			}
+			fmt.Print(str)
+			return nil
+		}
+
+		keg, id, _, err := get(x, args[1])
+
+		return Tag(keg.Path, id, args[0])
 	},
 }

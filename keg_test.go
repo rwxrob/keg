@@ -112,3 +112,13 @@ func ExampleLast() {
 	// 12
 	// <nil>
 }
+
+func ExampleReadTags() {
+	tags, err := keg.ReadTags(`testdata/samplekeg`)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(tags[`foo`][1])
+	// Output:
+	// 6
+}

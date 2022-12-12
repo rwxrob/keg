@@ -396,7 +396,10 @@ func (tl TagsMap) String() string {
 	for k, v := range tl {
 		str += k + " " + strings.Join(v, " ") + "\n"
 	}
-	return str[:len(str)-1]
+	if len(str) > 0 {
+		return str[:len(str)-1]
+	}
+	return str
 }
 
 func (tl TagsMap) MarshalText() ([]byte, error) {

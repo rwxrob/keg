@@ -410,3 +410,20 @@ func DexRemove(kegpath string, entry *DexEntry) error {
 
 	return WriteDex(kegpath, dex)
 }
+
+// ReadTags reads an existing dex/tags files within the target keg
+// directory. The tags file must have one tag group per line with the
+// tag being the first field. Fields are separated by a single space for
+// the most performant parsing possible.
+func ReadTags(kegdir string) (TagsMap, error) {
+	f := filepath.Join(kegdir, `dex`, `tags`)
+	buf, err := os.ReadFile(f)
+	if err != nil {
+		return nil, err
+	}
+	tmap := TagsMap{}
+	if err := tmap.UnmarshalText(buf); err != nil {
+		return nil, err
+	}
+	return tmap, nil
+}

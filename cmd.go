@@ -114,17 +114,60 @@ func current(x *Z.Cmd) (*Local, error) {
 	// if we have an env it beats config settings
 	name = os.Getenv(`KEG_CURRENT`)
 	if name != "" {
+
+		switch name[0] {
+
+		case os.PathSeparator:
+			local := &Local{Path: name}
+			if strings.HasSuffix(name, string(os.PathSeparator)+`docs`) {
+				local.Name = filepath.Base(filepath.Dir(name))
+				return local, nil
+			}
+			local.Name = filepath.Base(name)
+			return local, nil
+
+		case '~':
+			local := &Local{Path: name}
+			dir = fs.Tilde2Home(dir)
+			if strings.HasSuffix(name, string(os.PathSeparator)+`docs`) {
+				local.Name = filepath.Base(filepath.Dir(name))
+				return local, nil
+			}
+			local.Name = filepath.Base(name)
+			return local, nil
+
+		default:
+			dir, _ = x.C(`map.` + name)
+			if !(dir == "" || dir == "null") {
+
+				dir = fs.Tilde2Home(dir)
+				if fs.NotExists(dir) {
+					return nil, fs.ErrNotExist{dir}
+				}
+
+				docsdir := filepath.Join(dir, `docs`)
+				if fs.Exists(docsdir) {
+					dir = docsdir
+				}
+				return &Local{Path: dir, Name: name}, nil
+			}
+
+		}
+
+	}
+
+	// check vars and conf
+	name, _ = x.Get(`current`)
+	if name != "" {
+
+		if name[0] == os.PathSeparator || name[0] == '~' {
+			os.Setenv(`KEG_CURRENT`, name)
+			return current(x)
+		}
+
 		dir, _ = x.C(`map.` + name)
 		if !(dir == "" || dir == "null") {
-
 			dir = fs.Tilde2Home(dir)
-			if fs.NotExists(dir) {
-				return nil, fs.ErrNotExist{dir}
-			}
-			docsdir := filepath.Join(dir, `docs`)
-			if fs.Exists(docsdir) {
-				dir = docsdir
-			}
 			return &Local{Path: dir, Name: name}, nil
 		}
 	}
@@ -145,16 +188,6 @@ func current(x *Z.Cmd) (*Local, error) {
 		name = filepath.Base(dir)
 		dir = filepath.Join(dir, `docs`)
 		return &Local{Path: dir, Name: name}, nil
-	}
-
-	// check vars and conf
-	name, _ = x.Get(`current`)
-	if name != "" {
-		dir, _ = x.C(`map.` + name)
-		if !(dir == "" || dir == "null") {
-			dir = fs.Tilde2Home(dir)
-			return &Local{Path: dir, Name: name}, nil
-		}
 	}
 
 	return nil, fmt.Errorf(_NoKegsFound)
@@ -185,6 +218,7 @@ var Cmd = &Z.Cmd{
 
 	Shortcuts: Z.ArgMap{
 		`set`:    {`var`, `set`},
+		`unset`:  {`var`, `unset`},
 		`get`:    {`var`, `get`},
 		`sample`: {`create`, `sample`},
 	},

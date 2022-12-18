@@ -69,6 +69,9 @@ var _link string
 //go:embed text/en/tag.md
 var _tag string
 
+//go:embed text/en/next.md
+var _next string
+
 const (
 	_NoKegsFound     = `no kegs found`
 	_NodeNotFound    = `node not found: %v`

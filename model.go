@@ -141,14 +141,15 @@ func (d *Dex) MarshalJSON() ([]byte, error) {
 }
 
 // Lookup does a linear search through the Dex for one with the passed
-// id and if found returns, otherwise returns nil.
-func (d Dex) Lookup(id int) *DexEntry {
+// id and if found returns along with the current position in the Dex
+// slice, otherwise returns nil and negative 1.
+func (d Dex) Lookup(id int) (int, *DexEntry) {
 	for i, node := range d {
 		if node.N == id {
-			return d[i]
+			return i, d[i]
 		}
 	}
-	return nil
+	return -1, nil
 }
 
 // String fulfills the fmt.Stringer interface as JSON. Any error returns
@@ -187,24 +188,48 @@ func (e Dex) TSV() string {
 
 // Last returns the DexEntry with the highest integer value identifier.
 func (d Dex) Last() *DexEntry {
-	last := new(DexEntry)
+	entry := new(DexEntry)
 	for _, e := range d {
-		if e.N > last.N {
-			last = e
+		if e.N > entry.N {
+			entry = e
 		}
 	}
-	return last
+	return entry
 }
 
-// LastChanged returns the highest integer value identifier.
-func (d Dex) LastChanged() *DexEntry {
-	last := new(DexEntry)
+// First returns the first content node created. Returns nil if it
+// cannot determine. The first node is always the one with the lowest
+// integer identifier greater than 0.
+func (d Dex) First() *DexEntry {
+	entry := new(DexEntry)
 	for _, e := range d {
-		if e.U.After(last.U) {
-			last = e
+		if e.N > 0 && (entry.N == 0 || entry.N > e.N) {
+			entry = e
 		}
 	}
-	return last
+	return entry
+}
+
+// LastChanged returns the entry with the most recent modification time.
+func (d Dex) LastChanged() *DexEntry {
+	entry := new(DexEntry)
+	for _, e := range d {
+		if e.U.After(entry.U) {
+			entry = e
+		}
+	}
+	return entry
+}
+
+// FirstChanged returns the entry with the oldest modification time.
+func (d Dex) FirstChanged() *DexEntry {
+	entry := new(DexEntry)
+	for _, e := range d {
+		if e.U.Before(entry.U) {
+			entry = e
+		}
+	}
+	return entry
 }
 
 // LastIdString returns Last as string.

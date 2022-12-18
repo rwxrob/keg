@@ -97,9 +97,9 @@ func ExampleWriteDex() {
 }
 */
 
-func ExampleNext() {
-	fmt.Println(keg.Next(`testdata/samplekeg`).N)
-	fmt.Println(keg.Next(`testdata/noexist`))
+func ExampleNextNew() {
+	fmt.Println(keg.NextNew(`testdata/samplekeg`).N)
+	fmt.Println(keg.NextNew(`testdata/noexist`))
 	// Output:
 	// 13
 	// <nil>
@@ -110,6 +110,14 @@ func ExampleLast() {
 	fmt.Println(keg.Last(`testdata/noexist`))
 	// Output:
 	// 12
+	// <nil>
+}
+
+func ExampleFirst() {
+	fmt.Println(keg.First(`testdata/samplekeg`).N)
+	fmt.Println(keg.First(`testdata/noexist`))
+	// Output:
+	// 1
 	// <nil>
 }
 

@@ -69,7 +69,7 @@ func get(x *Z.Cmd, it string) (keg *Local, id string, entry *DexEntry, err error
 
 		if err == nil {
 
-			entry = dex.Lookup(idn)
+			_, entry = dex.Lookup(idn)
 			if entry == nil {
 				err = fmt.Errorf(_NodeNotFound, idn)
 				return
@@ -214,6 +214,7 @@ var Cmd = &Z.Cmd{
 		indexCmd, createCmd, currentCmd, directoryCmd, deleteCmd,
 		lastCmd, changesCmd, titlesCmd, initCmd, randomCmd,
 		importCmd, grepCmd, viewCmd, columnsCmd, linkCmd, tagCmd,
+		nextCmd,
 	},
 
 	Shortcuts: Z.ArgMap{
@@ -439,6 +440,7 @@ var changesCmd = &Z.Cmd{
 	Shortcuts: Z.ArgMap{
 		`default`: {`var`, `get`, `default`},
 		`set`:     {`var`, `set`},
+		`unset`:   {`var`, `unset`},
 	},
 
 	Call: func(x *Z.Cmd, args ...string) error {
@@ -829,7 +831,8 @@ var grepCmd = &Z.Cmd{
 				continue
 			}
 			lastid = id
-			fmt.Println(dex.Lookup(id).AsInclude())
+			_, entry := dex.Lookup(id)
+			fmt.Println(entry.AsInclude())
 		}
 		return nil
 	},

@@ -181,7 +181,7 @@ func LastChanged(kegpath string) *DexEntry {
 }
 
 // Last returns the last created content node. If cannot determine
-// returns nil
+// returns nil.
 func Last(kegpath string) *DexEntry {
 	dex, err := ReadDex(kegpath)
 	if err != nil {
@@ -190,13 +190,56 @@ func Last(kegpath string) *DexEntry {
 	return dex.Last()
 }
 
-// Next returns a new DexEntry with its integer identify set to the next
+// NextOldest reads the dex of the keg at kegpath and returns the entry
+// immediately before the last entry when sorted ById. If there is
+// nothing older returns self.
+func NextOldest(kegpath string, cur *DexEntry) *DexEntry {
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return nil
+	}
+	i, _ := dex.ByID().Lookup(cur.N)
+	if i > 0 {
+		return (*dex)[i-1]
+	}
+	return cur
+}
+
+// First returns the first content node created. Returns nil if it
+// cannot determine. The first node is always the one with the lowest
+// integer identifier greater than 0.
+func First(kegpath string) *DexEntry {
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return nil
+	}
+	return dex.First()
+}
+
+// Lookup opens the dex of the target keg and returns Lookup on it.
+// Generally it is more efficient to use Lookup on a Dex that has
+// already been previously been loaded. The id passed is a string since
+// it is usually being passed from user or configuration values and not
+// a proper integer. Returns nil if entry cannot be found.
+func Lookup(kegpath, id string) (int, *DexEntry) {
+	dex, err := ReadDex(kegpath)
+	if err != nil {
+		return -1, nil
+	}
+	idn, err := strconv.Atoi(id)
+	if err != nil {
+		return -1, nil
+	}
+	return dex.Lookup(idn)
+}
+
+// NextNew returns a new DexEntry with its integer identify set to the next
 // integer after Last and returns nil if cannot determine which is next.
 // The updated time stamp is set to the current time even though the
 // DexEntry may not have yet been written to disk and its time would be
 // different from the actual time written. This is to save the overhead
 // of grabbing it again once written.
-func Next(kegpath string) *DexEntry {
+func NextNew(kegpath string) *DexEntry {
 	last := Last(kegpath)
 	if last == nil {
 		return nil
@@ -305,7 +348,7 @@ func DexUpdate(kegpath string, entry *DexEntry) error {
 		return err
 	}
 
-	found := dex.Lookup(entry.N)
+	_, found := dex.Lookup(entry.N)
 	if found == nil {
 		dex.Add(entry)
 	} else {
@@ -380,7 +423,7 @@ func Import(kegpath string, targets ...string) error {
 func ImportNode(kegpath, target string) error {
 	var err error
 
-	next := Next(kegpath)
+	next := NextNew(kegpath)
 	if next == nil {
 		return fmt.Errorf(_CantGetNextNode, target)
 	}

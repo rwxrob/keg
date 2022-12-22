@@ -31,7 +31,7 @@ func ScanTitle(s pegn.Scanner, buf *[]rune) bool {
 	}
 	var count int
 	for s.Scan() {
-		if count >= 70 {
+		if count > 70 {
 			return s.Revert(m, Title)
 		}
 		r := s.Rune()

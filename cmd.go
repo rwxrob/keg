@@ -590,7 +590,7 @@ var editCmd = &Z.Cmd{
 var createCmd = &Z.Cmd{
 	Name:        `create`,
 	Aliases:     []string{`c`},
-	Params:      []string{`sample`},
+	Params:      []string{`sample`, `-`},
 	MaxArgs:     1,
 	Summary:     help.S(_create),
 	Description: help.D(_create),
@@ -608,14 +608,25 @@ var createCmd = &Z.Cmd{
 			return err
 		}
 
-		if len(args) > 0 && args[0] == `sample` {
-			if err := WriteSample(keg.Path, entry); err != nil {
-				return err
+		openEditor := true
+
+		if len(args) > 0 {
+			if args[0] == `sample` {
+				if err := WriteSample(keg.Path, entry); err != nil {
+					return err
+				}
+			} else if args[0] == `-` {
+				openEditor = false
+				if err := WriteStdin(keg.Path, entry); err != nil {
+					return err
+				}
 			}
 		}
 
-		if err := Edit(keg.Path, entry.N); err != nil {
-			return err
+		if openEditor {
+			if err := Edit(keg.Path, entry.N); err != nil {
+				return err
+			}
 		}
 
 		path := filepath.Join(keg.Path, entry.ID(), `README.md`)

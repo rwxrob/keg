@@ -4,6 +4,7 @@ import (
 	"bufio"
 	_ "embed"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -344,6 +345,19 @@ func WriteSample(kegpath string, entry *DexEntry) error {
 	return file.Overwrite(
 		filepath.Join(kegpath, entry.ID(), `README.md`),
 		SampleNodeReadme,
+	)
+}
+
+// WriteStdin reads the input from stdin to the entry indicated in the keg
+// specified by kegpath.
+func WriteStdin(kegpath string, entry *DexEntry) error {
+	text, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return err
+	}
+	return file.Overwrite(
+		filepath.Join(kegpath, entry.ID(), `README.md`),
+		string(text),
 	)
 }
 
